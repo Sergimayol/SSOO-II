@@ -15,17 +15,30 @@ int main(int argc, char **argv)
     // Comprobar si los parámetros son correctos
     if (argc == 3)
     {
-        
         if (bmount(argv[1]) == -1)
         {
             // Error
             return -1;
         }
-        for (size_t i = 0; i < argv[2]; i++)
+        unsigned int nbloques = atoi(argv[2]);
+        // array de tipo unsigned char del tamaño de un bloque
+        unsigned char buffer[BLOCKSIZE];
+        // Bloque vacio
+        memset(buffer, '\0', BLOCKSIZE);
+        for (size_t i = 0; i < nbloques; i++)
         {
-            /* code */
+            if (bwrite(i, buffer) == -1)
+            {
+                // error
+                return -1;
+            }
+            memset(buffer, '\0', BLOCKSIZE);
         }
-        
+        if (bumount() == -1)
+        {
+            // error
+            return -1;
+        }
     }
     else
     {

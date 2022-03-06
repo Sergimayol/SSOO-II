@@ -26,7 +26,7 @@ int bmount(const char *camino)
 // Desmonta el dispositivo virtual. Devuelve 0 (o EXIT_SUCCESS)
 // si se ha cerrado el fichero correctamente, o -1 (o EXIT_FAILURE)
 // en caso contrario.
-int bmount()
+int bumount()
 {
     descriptor = close(descriptor);
     if (descriptor == -1)
