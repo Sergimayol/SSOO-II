@@ -72,7 +72,6 @@ int bwrite(unsigned int nbloque, const void *buf)
 // con el bloque físico especificado por nbloque.
 int bread(unsigned int nbloque, void *buf)
 {
-    off_t desp = lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET);
     // lseek: despplazamiento en el gestor de ficheros al bloque deseado
     // SEEK_SET = punto de referencia, desde el inicio del fichero
     off_t desp = lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET);
