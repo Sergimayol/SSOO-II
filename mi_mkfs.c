@@ -18,6 +18,7 @@ int main(int argc, char **argv)
         if (bmount(argv[1]) == -1)
         {
             // Error
+            fprintf(stderr, "Error montando el dispositivo virtual.");
             return -1;
         }
         unsigned int nbloques = atoi(argv[2]);
@@ -30,6 +31,7 @@ int main(int argc, char **argv)
             if (bwrite(i, buffer) == -1)
             {
                 // error
+                fprintf(stderr, "Error escribiendo bloque (%d).", i);
                 return -1;
             }
             memset(buffer, '\0', BLOCKSIZE);
@@ -37,12 +39,14 @@ int main(int argc, char **argv)
         if (bumount() == -1)
         {
             // error
+            fprintf(stderr, "Error desmontando el dispositivo virtual.");
             return -1;
         }
     }
     else
     {
         // Error (parámetros incorrectos)
+        fprintf(stderr, "Error: parametros incorrectos.");
         return -1;
     }
 }

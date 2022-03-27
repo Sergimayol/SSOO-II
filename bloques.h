@@ -9,7 +9,6 @@
 #include <string.h>     // strerror()
 
 #define BLOCKSIZE 1024  // bytes
-#define EXIT_FAILURE -1 // Redefinir EXIT_FAILURE a -1
 
 int bmount(const char *camino);
 int bumount();

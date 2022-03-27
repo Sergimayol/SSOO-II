@@ -67,6 +67,7 @@ int initMB()
     if (memset(buffer, 0, sizeof(buffer)) == NULL)
     {
         // error
+        fprintf(stderr, "Error asignando un valor al array.");
         return -1;
     }
     for (size_t i = SB.posPrimerBloqueMB; i < SB.posUltimoBloqueMB; i++)
@@ -74,6 +75,7 @@ int initMB()
         if (bwrite(i, buffer) == -1)
         {
             // Error
+            fprintf(stderr, "Error escribiendo bloque(%d).", i);
             return -1;
         }
     }
@@ -82,6 +84,6 @@ int initMB()
 }
 
 // Esta función se encargará de inicializar la lista de inodos libres.
-int initAI() {
-
+int initAI()
+{
 }

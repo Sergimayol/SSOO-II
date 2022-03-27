@@ -17,6 +17,7 @@ int bmount(const char *camino)
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
     if (descriptor == -1)
     {
+        fprintf(stderr, "Error montando el dispositivo virtual.");
         // error (return -1)
         return EXIT_FAILURE;
     }
@@ -31,6 +32,7 @@ int bumount()
     descriptor = close(descriptor);
     if (descriptor == -1)
     {
+        fprintf(stderr, "Error desmontando el dispositivo virtual.");
         // return -1
         return EXIT_FAILURE;
     }
@@ -42,11 +44,12 @@ int bumount()
 // en el bloque físico especificado por nbloque.
 int bwrite(unsigned int nbloque, const void *buf)
 {
-    // lseek: despplazamiento en el gestor de ficheros al bloque deseado
+    // lseek: desplazamiento en el gestor de ficheros al bloque deseado
     // SEEK_SET = punto de referencia, desde el inicio del fichero
     off_t desp = lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET);
     if (desp == -1)
     {
+        fprintf(stderr, "Error calculando el desplazamiento.");
         return EXIT_FAILURE;
     }
     else
@@ -57,12 +60,13 @@ int bwrite(unsigned int nbloque, const void *buf)
         //(si ha ido bien, será BLOCKSIZE), o -1 (o EXIT_FAILURE) si se produce un error.
         if (bloquesW == -1)
         {
+            fprintf(stderr, "Error: Se ha producido un error al escribir");
             // Se ha producido un error al escribir
             return EXIT_FAILURE;
         }
         else
         {
-            // Se deveulven el num de bloques escritos
+            // Se devuelven el num de bloques escritos
             return BLOCKSIZE;
         }
     }
@@ -77,6 +81,7 @@ int bread(unsigned int nbloque, void *buf)
     off_t desp = lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET);
     if (desp == -1)
     {
+        fprintf(stderr, "Error calculando el desplazamiento.");
         return EXIT_FAILURE;
     }
     else
@@ -85,12 +90,13 @@ int bread(unsigned int nbloque, void *buf)
         size_t bloqueL = read(descriptor, buf, BLOCKSIZE);
         if (bloqueL == -1)
         {
+            fprintf(stderr, "Error: Se ha producido un error al escribir");
             // Se ha producido un error al escribir
             return EXIT_FAILURE;
         }
         else
         {
-            // Se deveulven el num de bloques leidos
+            // Se devuelven el num de bloques leidos
             return BLOCKSIZE;
         }
     }
