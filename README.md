@@ -6,4 +6,4 @@ Para hacer un gcc de muchos: 1- make clean, 2- make
 - mi_mkfs.c ✓
 ## Nivel 2
 - fichero_basico.c
-- fichero_basico.h
+- fichero_basico.h ✓
