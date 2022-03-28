@@ -32,7 +32,7 @@ int main(int argc, char **argv)
             {
                 // error
                 fprintf(stderr, "(mi_mkfs,bwrite)Error %d: %s\n", errno, strerror(errno));
-                fprintf(stderr, "Error escribiendo bloque (%zu).", i);
+                fprintf(stderr, "Error escribiendo bloque (%zu).\n", i);
                 return -1;
             }
             memset(buffer, '\0', BLOCKSIZE);
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     else
     {
         // Error (parámetros incorrectos)
-        fprintf(stderr, "Error: parametros incorrectos.");
+        fprintf(stderr, "Error: parametros incorrectos.\n");
         return -1;
     }
 }
