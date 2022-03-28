@@ -54,7 +54,6 @@ int bwrite(unsigned int nbloque, const void *buf)
     }
     else
     {
-        //! Optimizable, de momento no optimizar para una mayor comprensión
         size_t bloquesW = write(descriptor, buf, BLOCKSIZE);
         // devuelve el nº de bytes que ha podido escribir
         //(si ha ido bien, será BLOCKSIZE), o -1 (o EXIT_FAILURE) si se produce un error.
@@ -86,7 +85,6 @@ int bread(unsigned int nbloque, void *buf)
     }
     else
     {
-        //! Optimizable, de momento no optimizar para una mayor comprensión
         size_t bloqueL = read(descriptor, buf, BLOCKSIZE);
         if (bloqueL == -1)
         {
