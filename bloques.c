@@ -17,7 +17,7 @@ int bmount(const char *camino)
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
     if (descriptor == -1)
     {
-        fprintf(stderr, "Error montando el dispositivo virtual.");
+        fprintf(stderr, "(bmount(*c))Error %d: %s\n", errno, strerror(errno));
         // error (return -1)
         return EXIT_FAILURE;
     }
@@ -32,7 +32,7 @@ int bumount()
     descriptor = close(descriptor);
     if (descriptor == -1)
     {
-        fprintf(stderr, "Error desmontando el dispositivo virtual.");
+        fprintf(stderr, "(bmount)Error %d: %s\n", errno, strerror(errno));
         // return -1
         return EXIT_FAILURE;
     }
@@ -49,7 +49,7 @@ int bwrite(unsigned int nbloque, const void *buf)
     off_t desp = lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET);
     if (desp == -1)
     {
-        fprintf(stderr, "Error calculando el desplazamiento.");
+        fprintf(stderr, "(bwrite, 1)Error %d: %s\n", errno, strerror(errno));
         return EXIT_FAILURE;
     }
     else
@@ -60,7 +60,7 @@ int bwrite(unsigned int nbloque, const void *buf)
         //(si ha ido bien, será BLOCKSIZE), o -1 (o EXIT_FAILURE) si se produce un error.
         if (bloquesW == -1)
         {
-            fprintf(stderr, "Error: Se ha producido un error al escribir");
+            fprintf(stderr, "(bwrite, 2)Error %d: %s\n", errno, strerror(errno));
             // Se ha producido un error al escribir
             return EXIT_FAILURE;
         }
@@ -81,7 +81,7 @@ int bread(unsigned int nbloque, void *buf)
     off_t desp = lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET);
     if (desp == -1)
     {
-        fprintf(stderr, "Error calculando el desplazamiento.");
+        fprintf(stderr, "(bread, 1)Error %d: %s\n", errno, strerror(errno));
         return EXIT_FAILURE;
     }
     else
@@ -90,7 +90,7 @@ int bread(unsigned int nbloque, void *buf)
         size_t bloqueL = read(descriptor, buf, BLOCKSIZE);
         if (bloqueL == -1)
         {
-            fprintf(stderr, "Error: Se ha producido un error al escribir");
+            fprintf(stderr, "(bread, 2)Error %d: %s\n", errno, strerror(errno));
             // Se ha producido un error al escribir
             return EXIT_FAILURE;
         }
