@@ -18,7 +18,7 @@ int main(int argc, char **argv)
         if (bmount(argv[1]) == -1)
         {
             // Error
-            fprintf(stderr, "Error montando el dispositivo virtual.");
+            fprintf(stderr, "(mi_mkfs,bmount)Error %d: %s\n", errno, strerror(errno));
             return -1;
         }
         unsigned int nbloques = atoi(argv[2]);
@@ -31,6 +31,7 @@ int main(int argc, char **argv)
             if (bwrite(i, buffer) == -1)
             {
                 // error
+                fprintf(stderr, "(mi_mkfs,bwrite)Error %d: %s\n", errno, strerror(errno));
                 fprintf(stderr, "Error escribiendo bloque (%d).", i);
                 return -1;
             }
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
         if (bumount() == -1)
         {
             // error
-            fprintf(stderr, "Error desmontando el dispositivo virtual.");
+            fprintf(stderr, "(mi_mkfs,bumount)Error %d: %s\n", errno, strerror(errno));
             return -1;
         }
     }
