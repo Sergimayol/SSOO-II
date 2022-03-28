@@ -8,11 +8,11 @@ static int descriptor = 0;
 // trata de un fichero, esa acción consistirá en abrirlo.
 int bmount(const char *camino)
 {
-    //! NO se si hay que comprobar si hay un fichero ya abierto
     if (descriptor > 0)
     {
         close(descriptor);
     }
+    unmask(000);
     // Permisos rw-rw-rw (6-6-6)
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
     if (descriptor == -1)
