@@ -13,6 +13,7 @@ int tamMB(unsigned int nbloques)
     {
         return ((nbloques / 8) / BLOCKSIZE);
     }
+    // return ((nbloques / 8) % BLOCKSIZE != 0) ? (((nbloques / 8) / BLOCKSIZE) + 1) : ((nbloques / 8) / BLOCKSIZE);
 }
 
 // Calcula el tamaño en bloques del array de inodos.
@@ -26,6 +27,7 @@ int tamAI(unsigned int ninodos)
     {
         return ((ninodos * INODOSIZE) / BLOCKSIZE);
     }
+    // return ((ninodos * INODOSIZE) % BLOCKSIZE != 0) ? (((ninodos * INODOSIZE) / BLOCKSIZE) + 1) : ((ninodos * INODOSIZE) / BLOCKSIZE);
 }
 
 // Inicializa los datos del superbloque.
