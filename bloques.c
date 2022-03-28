@@ -54,7 +54,7 @@ int bwrite(unsigned int nbloque, const void *buf)
     }
     else
     {
-        size_t bloquesW = write(descriptor, buf, BLOCKSIZE);
+        int bloquesW = write(descriptor, buf, BLOCKSIZE);
         // devuelve el nº de bytes que ha podido escribir
         //(si ha ido bien, será BLOCKSIZE), o -1 (o EXIT_FAILURE) si se produce un error.
         if (bloquesW == -1)
@@ -66,7 +66,7 @@ int bwrite(unsigned int nbloque, const void *buf)
         else
         {
             // Se devuelven el num de bloques escritos
-            return BLOCKSIZE;
+            return bloquesW;
         }
     }
 }
@@ -85,17 +85,17 @@ int bread(unsigned int nbloque, void *buf)
     }
     else
     {
-        size_t bloqueL = read(descriptor, buf, BLOCKSIZE);
+        int bloqueL = read(descriptor, buf, BLOCKSIZE);
         if (bloqueL == -1)
         {
             fprintf(stderr, "(bread, 2)Error %d: %s\n", errno, strerror(errno));
-            // Se ha producido un error al escribir
+            // Se ha producido un error al leer
             return EXIT_FAILURE;
         }
         else
         {
             // Se devuelven el num de bloques leidos
-            return BLOCKSIZE;
+            return bloqueL;
         }
     }
 }
