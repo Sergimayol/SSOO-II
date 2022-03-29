@@ -4,17 +4,17 @@ llamado desde la línea de comandos con los siguientes parámetros
 para dar nombre al dispositivo virtual y determinar la cantidad
 de bloques de que dispondrá nuestro sistema de ficheros.
 */
-#include "bloques.h"
+#include "ficheros_basico.h"
 
 // Uso:      ./mi_mkfs <nombre_dispositivo> <nbloques>
 // Núm. parámetros: argc=3
 // Parámetros: argv[0]="mi_mkfs", argv[1]=nombre_dispositivo, argv[2]=nbloques
 int main(int argc, char **argv)
 {
-    //! FALTA OPTIMIZAR
     // Comprobar si los parámetros son correctos
     if (argc == 3)
     {
+        umask(0);
         if (bmount(argv[1]) == -1)
         {
             // Error
@@ -22,10 +22,16 @@ int main(int argc, char **argv)
             return -1;
         }
         unsigned int nbloques = atoi(argv[2]);
+        if (nbloques <= 0)
+        {
+            // Error
+            fprintf(stderr, "(mi_mkfs,num. Bloques<=0)Error %d: %s\n", errno, strerror(errno));
+            return -1;
+        }
         // array de tipo unsigned char del tamaño de un bloque
         unsigned char buffer[BLOCKSIZE];
         // Bloque vacio
-        memset(buffer, '\0', BLOCKSIZE);
+        memset(buffer, 0, BLOCKSIZE);
         for (size_t i = 0; i < nbloques; i++)
         {
             if (bwrite(i, buffer) == -1)
@@ -35,12 +41,26 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Error escribiendo bloque (%zu).\n", i);
                 return -1;
             }
-            memset(buffer, '\0', BLOCKSIZE);
         }
         if (bumount() == -1)
         {
             // error
             fprintf(stderr, "(mi_mkfs,bumount)Error %d: %s\n", errno, strerror(errno));
+            return -1;
+        }
+        if (initSB(nbloques, (nbloques / 4)) == -1)
+        {
+            fprintf(stderr, "(mi_mkfs,initSB)Error %d: %s\n", errno, strerror(errno));
+            return -1;
+        }
+        if (initMB() == -1)
+        {
+            fprintf(stderr, "(mi_mkfs,initMB)Error %d: %s\n", errno, strerror(errno));
+            return -1;
+        }
+        if (initAI() == -1)
+        {
+            fprintf(stderr, "(mi_mkfs,initAI)Error %d: %s\n", errno, strerror(errno));
             return -1;
         }
     }
@@ -50,4 +70,5 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error: parametros incorrectos.\n");
         return -1;
     }
+    return 0;
 }

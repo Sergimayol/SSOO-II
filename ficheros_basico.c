@@ -1,7 +1,5 @@
 #include "ficheros_basico.h"
 
-struct superbloque SB;
-
 // Calcula el tamaño en bloques necesario para el mapa de bits.
 int tamMB(unsigned int nbloques)
 {
@@ -13,7 +11,7 @@ int tamMB(unsigned int nbloques)
     {
         return ((nbloques / 8) / BLOCKSIZE);
     }
-    // return ((nbloques / 8) % BLOCKSIZE != 0) ? (((nbloques / 8) / BLOCKSIZE) + 1) : ((nbloques / 8) / BLOCKSIZE);
+    // return (((nbloques / 8) % BLOCKSIZE) != 0) ? (((nbloques / 8) / BLOCKSIZE) + 1) : ((nbloques / 8) / BLOCKSIZE);
 }
 
 // Calcula el tamaño en bloques del array de inodos.
@@ -27,12 +25,13 @@ int tamAI(unsigned int ninodos)
     {
         return ((ninodos * INODOSIZE) / BLOCKSIZE);
     }
-    // return ((ninodos * INODOSIZE) % BLOCKSIZE != 0) ? (((ninodos * INODOSIZE) / BLOCKSIZE) + 1) : ((ninodos * INODOSIZE) / BLOCKSIZE);
+    // return (((ninodos * INODOSIZE) % BLOCKSIZE) != 0) ? (((ninodos * INODOSIZE) / BLOCKSIZE) + 1) : ((ninodos * INODOSIZE) / BLOCKSIZE);
 }
 
 // Inicializa los datos del superbloque.
 int initSB(unsigned int nbloques, unsigned int ninodos)
 {
+    struct superbloque SB;
     // Posición del primer bloque del mapa de bits
     SB.posPrimerBloqueMB = posSB + tamSB;
     // Posición del último bloque del mapa de bits
@@ -65,11 +64,14 @@ int initSB(unsigned int nbloques, unsigned int ninodos)
 // simplemente pondremos a 0 todos los bits del mapa de bits.
 int initMB()
 {
+    struct superbloque SB;
     unsigned char buffer[BLOCKSIZE];
-    if (memset(buffer, 0, sizeof(buffer)) == NULL)
+    memset(buffer, 0, BLOCKSIZE);
+    // Lectura del superbloque para obtener localización mapa de bits.
+    if (bread(posSB, &SB) == -1)
     {
-        // error
-        fprintf(stderr, "Error asignando un valor al array.");
+        fprintf(stderr, "(initMB)Error %d: %s\n", errno, strerror(errno));
+        fprintf(stderr, "Error leyendo superbloque.\n");
         return -1;
     }
     for (size_t i = SB.posPrimerBloqueMB; i < SB.posUltimoBloqueMB; i++)
@@ -77,15 +79,57 @@ int initMB()
         if (bwrite(i, buffer) == -1)
         {
             // Error
-            fprintf(stderr, "Error escribiendo bloque(%d).", i);
+            fprintf(stderr, "(initMB)Error %d: %s\n", errno, strerror(errno));
+            fprintf(stderr, "Error escribiendo bloque (%zu).\n", i);
             return -1;
         }
     }
-    //! Creo que no finalizado
-    //? Reservar bloques¿?
+    return EXIT_SUCCESS;
 }
 
 // Esta función se encargará de inicializar la lista de inodos libres.
 int initAI()
 {
+    // buffer para ir recorriendo el array de inodos
+    struct inodo inodos[BLOCKSIZE / INODOSIZE];
+    struct superbloque SB;
+    unsigned int contInodos;
+    // Lectura del superbloque para obtener localización array de inodos.
+    if (bread(posSB, &SB) == -1)
+    {
+        return EXIT_FAILURE;
+    }
+    //+1 porque hemos iniciado SB.posPrimerInodoLibre = 0
+    contInodos = SB.posPrimerInodoLibre + 1;
+    // Para cada bloque del AI
+    for (size_t i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++)
+    {
+        // Para cada inodo del AI
+        for (size_t j = 0; j < (BLOCKSIZE / INODOSIZE); j++)
+        {
+            inodos[j].tipo = 'l'; // libre
+            // Si no hemos llegado al último inodo
+            if (contInodos < SB.totInodos)
+            {
+                // Enlazamos con el siguiente
+                inodos[j].punterosDirectos[0] = contInodos;
+                contInodos++;
+            }
+            else
+            {
+                // Hemos llegado al último inodo
+                inodos[j].punterosDirectos[0] = UINT_MAX;
+                break;
+            }
+        }
+        // Escribir el bloque de inodos i  en el dispositivo virtual
+        if (bwrite(i, inodos) == -1)
+        {
+            // Error
+            fprintf(stderr, "(initMB)Error %d: %s\n", errno, strerror(errno));
+            fprintf(stderr, "Error escribiendo bloque (%zu).\n", i);
+            return EXIT_FAILURE;
+        }
+    }
+    return EXIT_SUCCESS;
 }
