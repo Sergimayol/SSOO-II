@@ -21,7 +21,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "(mi_mkfs,bmount)Error %d: %s\n", errno, strerror(errno));
             return -1;
         }
-        unsigned int nbloques = atoi(argv[2]);
+        int nbloques = atoi(argv[2]);
         if (nbloques <= 0)
         {
             // Error
@@ -42,12 +42,6 @@ int main(int argc, char **argv)
                 return -1;
             }
         }
-        if (bumount() == -1)
-        {
-            // error
-            fprintf(stderr, "(mi_mkfs,bumount)Error %d: %s\n", errno, strerror(errno));
-            return -1;
-        }
         if (initSB(nbloques, (nbloques / 4)) == -1)
         {
             fprintf(stderr, "(mi_mkfs,initSB)Error %d: %s\n", errno, strerror(errno));
@@ -61,6 +55,12 @@ int main(int argc, char **argv)
         if (initAI() == -1)
         {
             fprintf(stderr, "(mi_mkfs,initAI)Error %d: %s\n", errno, strerror(errno));
+            return -1;
+        }
+        if (bumount() == -1)
+        {
+            // error
+            fprintf(stderr, "(mi_mkfs,bumount)Error %d: %s\n", errno, strerror(errno));
             return -1;
         }
     }
