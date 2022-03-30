@@ -7,6 +7,3 @@
 ## Nivel 2
 - fichero_basico.c ✓
 - fichero_basico.h ✓
-
-https://github.com/Zygmut/SSOO-II
-https://github.com/gianm99/file-system
