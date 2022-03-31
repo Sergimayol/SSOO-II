@@ -84,7 +84,7 @@ int initMB()
             return -1;
         }
     }
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 // Esta función se encargará de inicializar la lista de inodos libres.
@@ -97,7 +97,7 @@ int initAI()
     // Lectura del superbloque para obtener localización array de inodos.
     if (bread(posSB, &SB) == -1)
     {
-        return EXIT_FAILURE;
+        return -1;
     }
     //+1 porque hemos iniciado SB.posPrimerInodoLibre = 0
     contInodos = SB.posPrimerInodoLibre + 1;
@@ -128,8 +128,128 @@ int initAI()
             // Error
             fprintf(stderr, "(initMB)Error %d: %s\n", errno, strerror(errno));
             fprintf(stderr, "Error escribiendo bloque (%zu).\n", i);
-            return EXIT_FAILURE;
+            return -1;
         }
     }
-    return EXIT_SUCCESS;
+    return 0;
+}
+
+// Esta función escribe el valor indicado por el parámetro
+// bit: 0 (libre) ó 1 (ocupado) en un determinado bit del MB
+// que representa el bloque nbloque.
+int escribir_bit(unsigned int nbloque, unsigned int bit)
+{
+    unsigned char bufferMB[BLOCKSIZE];
+    int posbyte, posbit, nbloqueMB, nbloqueabs;
+    struct superbloque SB;
+    // Lectura del superbloque para obtener localización array de inodos.
+    if (bread(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    posbyte = nbloque / 8;
+    posbit = nbloque % 8;
+    nbloqueMB = posbyte / BLOCKSIZE;
+    nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
+    if (bread(nbloqueabs, bufferMB) == -1)
+    {
+        return -1;
+    }
+    posbyte = posbyte % BLOCKSIZE;
+    // 10000000
+    unsigned char mascara = 128;
+    // desplazamiento de bits a la derecha
+    mascara >>= posbit;
+    if (bit == 0)
+    {
+        // operadores AND y NOT para bits
+        bufferMB[posbyte] &= ~mascara;
+    }
+    else if (bit == 1)
+    {
+        //  operador OR para bits
+        bufferMB[posbyte] | = mascara;
+    }
+    else
+    {
+        return -1;
+    }
+    if (bwrite(nbloqueabs, bufferMB) == -1)
+    {
+        return -1;
+    }
+    return 0;
+}
+
+// Lee un determinado bit del MB y devuelve el valor del bit leído.
+char leer_bit(unsigned int nbloque)
+{
+    unsigned char bufferMB[BLOCKSIZE];
+    int posbyte, posbit, nbloqueMB, nbloqueabs;
+    struct superbloque SB;
+    // Lectura del superbloque para obtener localización array de inodos.
+    if (bread(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    posbyte = nbloque / 8;
+    posbit = nbloque % 8;
+    nbloqueMB = posbyte / BLOCKSIZE;
+    nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
+    if (bread(nbloqueabs, bufferMB) == -1)
+    {
+        return -1;
+    }
+    posbyte = posbyte % BLOCKSIZE;
+    // 10000000
+    unsigned char mascara = 128;
+    // desplazamiento de bits a la derecha
+    mascara >>= posbit;
+    // operador AND para bits
+    mascara &= bufferMB[posbyte];
+    // desplazamiento de bits a la derecha
+    mascara >>= (7 - posbit);
+    return mascara;
+}
+
+// Encuentra el primer bloque libre, consultando el MB (primer bit a 0),
+// lo ocupa (poniendo el correspondiente bit a 1) y devuelve su posición.
+int reservar_bloque()
+{
+    int posBloqueMB, posbyte, nbloque, posbit;
+    unsigned char bufferMB[BLOCKSIZE], bufferAux[BLOCKSIZE], mascara, bufferByte;
+    struct superbloque SB;
+    // Lectura del superbloque para obtener localización array de inodos.
+    if (bread(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    // Quedan nodos libres?
+    if (SB.cantBloquesLibres == 0)
+    {
+        return -1;
+    }
+    memset(bufferAux, 255, BLOCKSIZE);
+    posBloqueMB = SB.posPrimerBloqueMB;
+    if (bread(posBloqueMB, bufferMB) == -1)
+    {
+        return -1;
+    }
+    while (posBloqueMB <= SB.posUltimoBloqueMB)
+    {
+        if (memcmp(bufferMB, bufferAux, BLOCKSIZE) == 0)
+        {
+            break;
+        }
+        posBloqueMB++;
+        if (bread(posBloqueMB, bufferMB) == -1)
+        {
+            return -1;
+        }
+    }
+    if (memcmp(bufferMB, bufferAux, BLOCKSIZE) == 0)
+    {
+        return -1;
+    }
+    //No terminado
 }
