@@ -57,6 +57,8 @@ int main(int argc, char **argv)
             fprintf(stderr, "(mi_mkfs,initAI)Error %d: %s\n", errno, strerror(errno));
             return -1;
         }
+        // Creacion de direccorio raíz
+        reservar_inodo('d', 7);
         if (bumount() == -1)
         {
             // error

@@ -216,7 +216,7 @@ char leer_bit(unsigned int nbloque)
 // lo ocupa (poniendo el correspondiente bit a 1) y devuelve su posición.
 int reservar_bloque()
 {
-    int posBloqueMB, posbyte, nbloque, posbit;
+    int nbloqueabs, posbyte, nbloque, posbit;
     unsigned char bufferMB[BLOCKSIZE], bufferAux[BLOCKSIZE], mascara, bufferByte;
     struct superbloque SB;
     // Lectura del superbloque para obtener localización array de inodos.
@@ -230,19 +230,19 @@ int reservar_bloque()
         return -1;
     }
     memset(bufferAux, 255, BLOCKSIZE);
-    posBloqueMB = SB.posPrimerBloqueMB;
-    if (bread(posBloqueMB, bufferMB) == -1)
+    nbloqueabs = SB.posPrimerBloqueMB;
+    if (bread(nbloqueabs, bufferMB) == -1)
     {
         return -1;
     }
-    while (posBloqueMB <= SB.posUltimoBloqueMB)
+    while (nbloqueabs <= SB.posUltimoBloqueMB)
     {
-        if (memcmp(bufferMB, bufferAux, BLOCKSIZE) == 0)
+        if (memcmp(bufferMB, bufferAux, BLOCKSIZE) != 0)
         {
             break;
         }
-        posBloqueMB++;
-        if (bread(posBloqueMB, bufferMB) == -1)
+        nbloqueabs++;
+        if (bread(nbloqueabs, bufferMB) == -1)
         {
             return -1;
         }
@@ -251,5 +251,148 @@ int reservar_bloque()
     {
         return -1;
     }
-    //No terminado
+    posbyte = 0;
+    bufferByte = 255;
+    while (posbyte < BLOCKSIZE)
+    {
+        if (memcmp(&bufferMB[posbyte], &bufferByte, 1) != 0)
+        {
+            break;
+        }
+        posbyte++;
+    }
+    if (posbyte == BLOCKSIZE)
+    {
+        return -1;
+    }
+    mascara = 128; // 10000000
+    posbit = 0;
+    // encontrar el primer bit a 0 en ese byte
+    while (bufferMB[posbyte] & mascara) // operador AND para bits
+    {
+        bufferMB[posbyte] <<= 1; // desplazamiento de bits a la izquierda
+        posbit++;
+    }
+    nbloque = ((nbloqueabs - SB.posPrimerBloqueMB) * BLOCKSIZE + posbyte) * 8 + posbit;
+    if (escribir_bit(nbloque, 1) == -1)
+    {
+        return -1;
+    }
+    SB.cantBloquesLibres--;
+    memset(bufferAux, 0, BLOCKSIZE);
+    if (bwrite(nbloque, bufferAux) == -1)
+    {
+        return -1;
+    }
+    return nbloque;
+}
+
+// Libera un bloque determinado
+int liberar_bloque(unsigned int nbloque)
+{
+    if (escribir_bit(nbloque, 0))
+    {
+        return -1;
+    }
+    struct superbloque SB;
+    // Lectura del superbloque para obtener localización array de inodos.
+    if (bread(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    SB.cantBloquesLibres++;
+    if (bwrite(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    return nbloque;
+}
+
+// Escribe el contenido de una variable de tipo struct inodo
+// en un determinado inodo del array de inodos, inodos.
+int escribir_inodo(unsigned int ninodo, struct inodo inodo)
+{
+    struct inodo inodos[BLOCKSIZE / INODOSIZE];
+    struct superbloque SB;
+    // Lectura del superbloque para obtener localización array de inodos.
+    if (bread(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    unsigned int nbloqueabs = (ninodo * INODOSIZE) / BLOCKSIZE + SB.posPrimerBloqueAI;
+    if (bread(nbloqueabs, inodos) == -1)
+    {
+        return -1;
+    }
+    inodos[ninodo % (BLOCKSIZE / INODOSIZE)] = inodo;
+    if (bwrite(nbloqueabs, inodos) == -1)
+    {
+        return -1;
+    }
+    return 0;
+}
+
+// Lee un determinado inodo del array de inodos para volcarlo
+// en una variable de tipo struct inodo pasada por referencia.
+int leer_inodo(unsigned int ninodo, struct inodo *inodo)
+{
+    struct inodo inodos[BLOCKSIZE / INODOSIZE];
+    struct superbloque SB;
+    // Lectura del superbloque para obtener localización array de inodos.
+    if (bread(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    unsigned int nbloqueabs = (ninodo * INODOSIZE) / BLOCKSIZE + SB.posPrimerBloqueAI;
+    if (bread(nbloqueabs, inodos) == -1)
+    {
+        return -1;
+    }
+    *inodo = inodos[ninodo % (BLOCKSIZE / INODOSIZE)];
+    return 0;
+}
+
+// Encuentra el primer inodo libre (dato almacenado en el superbloque), lo reserva,
+// devuelve su número y actualiza la lista enlazada de inodos libres.
+int reservar_inodo(unsigned char tipo, unsigned char permisos)
+{
+    struct superbloque SB;
+    struct inodo inodoAux;
+    // Lectura del superbloque para obtener localización array de inodos.
+    if (bread(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    if (SB.cantInodosLibres < 1)
+    {
+        return -1;
+    }
+    unsigned int posInodoReservado = SB.posPrimerInodoLibre;
+    if (lee_inodo(posInodoReservado, &inodoAux) == -1)
+    {
+        return -1;
+    }
+
+    SB.posPrimerInodoLibre++;
+    SB.posPrimerInodoLibre = inodoAux.punterosDirectos[0];
+    inodoAux.tipo = tipo;
+    inodoAux.permisos = permisos;
+    inodoAux.nlinks = 1;
+    inodoAux.tamEnBytesLog = 0;
+    inodoAux.atime = time(NULL);
+    inodoAux.mtime = time(NULL);
+    inodoAux.ctime = time(NULL);
+    inodoAux.numBloquesOcupados = 0;
+    memset(inodoAux.punterosDirectos, 0, 12 * sizeof(unsigned int));
+    memset(inodoAux.punterosIndirectos, 0, 3 * sizeof(unsigned int));
+    if (escribir_inodo(posInodoReservado, inodoAux) == -1)
+    {
+        return -1;
+    }
+    SB.cantInodosLibres--;
+    if (bwrite(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    return posInodoReservado;
 }

@@ -1,5 +1,6 @@
 #include "bloques.h"
 #include <limits.h>
+#include <time.h>
 
 #define posSB 0 // el superbloque se escribe en el primer bloque de nuestro FS
 #define tamSB 1
@@ -27,10 +28,10 @@ struct inodo
    unsigned char tipo;     // Tipo ('l':libre, 'd':directorio o 'f':fichero)
    unsigned char permisos; // Permisos (lectura y/o escritura y/o ejecució
                            /* Por cuestiones internas de alineación de estructuras, si se está utilizando
-                          un tamaño de palabra de 4 bytes (microprocesadores de 32 bits):
-                         unsigned char reservado_alineacion1 [2];
-                         en caso de que la palabra utilizada sea del tamaño de 8 bytes
-                         (microprocesadores de 64 bits): unsigned char reservado_alineacion1 [6]; */
+                           un tamaño de palabra de 4 bytes (microprocesadores de 32 bits):
+                           unsigned char reservado_alineacion1 [2];
+                           en caso de que la palabra utilizada sea del tamaño de 8 bytes
+                           (microprocesadores de 64 bits): unsigned char reservado_alineacion1 [6]; */
    unsigned char reservado_alineacion1[6];
    time_t atime; // Fecha y hora del último acceso a datos
    time_t mtime; // Fecha y hora de la última modificación de datos
@@ -53,7 +54,6 @@ int tamAI(unsigned int ninodos);
 int initSB(unsigned int nbloques, unsigned int ninodos);
 int initMB();
 int initAI();
-// Nivel 3
 int escribir_bit(unsigned int nbloque, unsigned int bit);
 char leer_bit(unsigned int nbloque);
 int reservar_bloque();
