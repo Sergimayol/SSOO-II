@@ -435,3 +435,75 @@ int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *p
         return -1;
     }
 }
+
+// Obtención de los índices de los bloques de punteros.
+int obtener_indice(unsigned int nblogico, int nivel_punteros)
+{
+    if (nblogico < DIRECTOS)
+    {
+        return nblogico;
+    }
+    else if (nblogico < INDIRECTOS0)
+    {
+        return nblogico - DIRECTOS;
+    }
+    else if (nblogico < INDIRECTOS1)
+    {
+        if (nivel_punteros == 2)
+        {
+            return (nblogico - INDIRECTOS0) / NPUNTEROS;
+        }
+        else if (nivel_punteros == 1)
+        {
+            return (nblogico - INDIRECTOS0) % NPUNTEROS;
+        }
+    }
+    else if (nblogico < INDIRECTOS2)
+    {
+        if (nivel_punteros == 3)
+        {
+            return (nblogico - INDIRECTOS1) / (NPUNTEROS * NPUNTEROS);
+        }
+        else if (nivel_punteros == 2)
+        {
+            return ((nblogico - INDIRECTOS1) % (NPUNTEROS * NPUNTEROS)) / NPUNTEROS;
+        }
+        else if (nivel_punteros == 1)
+        {
+            return ((nblogico - INDIRECTOS1) % (NPUNTEROS * NPUNTEROS)) % NPUNTEROS;
+        }
+    }
+    return -1;
+}
+
+// Obtiene el nº de bloque físico correspondiente a un bloque lógico determinado del inodo indicado.
+// Enmascara la gestión de los diferentes rangos de punteros directos e indirectos del inodo, de manera
+// que funciones externas no tienen que preocuparse de cómo acceder a los bloques físicos apuntados desde el inodo.
+int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned char reservar)
+{
+    struct inodo inodo;
+    unsigned int ptr, ptr_ant;
+    int salvar_inodo, nRangoBL, nivel_punteros, indice;
+    unsigned int buffer[NPUNTEROS];
+    leer_inodo(ninodo, &inodo);
+    ptr = 0, ptr_ant = 0, salvar_inodo = 0;
+    nRangoBL = obtener_nRangoBL(&inodo, nblogico, &ptr); // 0:D, 1:I0, 2:I1, 3:I2
+    nivel_punteros = nRangoBL;                           // el nivel_punteros +alto es el que cuelga del inodo
+    while (nivel_punteros > 0)
+    {
+        // no cuelgan bloques de punteros
+        if (ptr == 0)
+        {
+            if (reservar == 0)
+            {
+                // Si no existe bloque físico de datos, dará error.
+                return -1;
+            }
+            else
+            {
+                // reservar bloques de punteros y crear enlaces desde el  inodo hasta el bloque de datos
+            
+            }
+        }
+    }
+}
