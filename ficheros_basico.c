@@ -134,6 +134,8 @@ int initAI()
     return 0;
 }
 
+/* --------- Nivel 3 --------- */
+
 // Esta función escribe el valor indicado por el parámetro
 // bit: 0 (libre) ó 1 (ocupado) en un determinado bit del MB
 // que representa el bloque nbloque.
@@ -168,7 +170,7 @@ int escribir_bit(unsigned int nbloque, unsigned int bit)
     else if (bit == 1)
     {
         //  operador OR para bits
-        bufferMB[posbyte] | = mascara;
+        bufferMB[posbyte] |= mascara;
     }
     else
     {
@@ -395,4 +397,41 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos)
         return -1;
     }
     return posInodoReservado;
+}
+
+/* --------- Nivel 4 --------- */
+
+// Funcion auxiliar que asocia un nivel a cada rango de bloques lógicos, devolviendo
+// el rango del bloque lógico indicado, siendo el rango 0 para bloques lógicos [0 , 11],
+// 1 para [12 , 267], 2 para [268 , 65.803] y 3 para [65.804 , 16.843.019].
+// También actualizar una variable puntero, ptr, pasada por referencia, para que apunte
+// donde lo hace el puntero correspondiente del inodo.
+int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr)
+{
+    if (nblogico < DIRECTOS)
+    {
+        *ptr = inodo->punterosDirectos[nblogico];
+        return 0;
+    }
+    else if (nblogico < INDIRECTOS0)
+    {
+        *ptr = inodo->punterosIndirectos[0];
+        return 1;
+    }
+    else if (nblogico < INDIRECTOS1)
+    {
+        *ptr = inodo->punterosIndirectos[1];
+        return 2;
+    }
+    else if (nblogico < INDIRECTOS2)
+    {
+        *ptr = inodo->punterosIndirectos[2];
+        return 3;
+    }
+    else
+    {
+        *ptr = 0;
+        printf("Bloque lógico fuera de rango");
+        return -1;
+    }
 }
