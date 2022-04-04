@@ -496,14 +496,77 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
         {
             if (reservar == 0)
             {
-                // Si no existe bloque físico de datos, dará error.
+                // bloque inexistente
                 return -1;
             }
             else
             {
                 // reservar bloques de punteros y crear enlaces desde el  inodo hasta el bloque de datos
-            
+                salvar_inodo = 1;
+                ptr = reservar_bloque(); // de punteros
+                inodo.numBloquesOcupados++;
+                inodo.ctime = time(NULL); // fecha actual
+                // el bloque cuelga directamente del inodo
+                if (nivel_punteros = nRangoBL)
+                {
+                    inodo.punterosIndirectos[nRangoBL - 1] = ptr; // (imprimirlo para test)
+                }
+                else
+                {
+                    // el bloque cuelga de otro bloque de punteros
+                    buffer[indice] = ptr;    // (imprimirlo para test)
+                    bwrite(ptr_ant, buffer); // salvamos en el dispositivo el buffer de punteros modificado
+                }
+                memset(buffer, 0, BLOCKSIZE); // ponemos a 0 todos los punteros del buffer
+            }
+        }
+        else
+        {
+            // leemos del dispositivo el bloque de punteros ya existente
+            if (bread(ptr, buffer) == -1)
+            {
+                return -1;
+            }
+        }
+        indice = obtener_indice(nblogico, nivel_punteros);
+        ptr_ant = ptr;        // guardamos el puntero actual
+        ptr = buffer[indice]; // y lo desplazamos al siguiente nivel
+        nivel_punteros--;
+    }
+    // no existe bloque de datos
+    if (ptr == 0)
+    {
+        if (reservar == 0)
+        {
+            // bloque inexistente
+            return -1;
+        }
+        else
+        {
+            // reservar bloques de punteros y crear enlaces desde el  inodo hasta el bloque de datos
+            salvar_inodo = 1;
+            ptr = reservar_bloque(); // de punteros
+            inodo.numBloquesOcupados++;
+            inodo.ctime = time(NULL); // fecha actual
+            if (nRangoBL == 0)
+            {
+                inodo.punterosDirectos[nblogico] = ptr; // (imprimirlo para test)
+            }
+            else
+            {
+                buffer[indice] = ptr;    // asignamos la dirección del bloque de datos (imprimirlo para test)
+                bwrite(ptr_ant, buffer); // salvamos en el dispositivo el buffer de punteros modificado
             }
         }
     }
+    if (salvar_inodo == 1)
+    {
+        // sólo si lo hemos actualizado
+        if (escribir_inodo(ninodo, inodo) == -1)
+        {
+            return -1;
+        }
+    }
+    // nº de bloque físico correspondiente al bloque de datos lógico, nblogico
+    return ptr;
 }
