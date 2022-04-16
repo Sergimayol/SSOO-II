@@ -11,7 +11,10 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error de sintaxis, la sintaxis correcta es: leer <nombre_dispositivo> <nº inodo>\n");
         return -1;
     }
-    bmount(argv[1]);
+    if(bmount(argv[1]) == -1){
+        fprintf(stderr, "Error montando el dispositivo\n");
+        return -1;
+    }
 
     int ninodo = atoi(argv[2]);
     struct inodo inodo;
@@ -51,8 +54,11 @@ int main(int argc, char **argv)
 
     fprintf(stderr, "\ntotal_leídos: %d\n", total_leidos);
     fprintf(stderr, "tamEnBytesLog: %d\n", inodo.tamEnBytesLog);
-
-    bumount();
+   
+    if (bumount() == -1){
+        fprintf(stderr, "Error desmontando el dispositivo\n");
+        return -1;
+    }
 
     return 0;
 }

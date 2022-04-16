@@ -18,7 +18,7 @@ int bmount(const char *camino)
     {
         fprintf(stderr, "(bmount(*c))Error %d: %s\n", errno, strerror(errno));
         // error (return -1)
-        return EXIT_FAILURE;
+        return -1;
     }
     return descriptor;
 }
@@ -33,10 +33,10 @@ int bumount()
     {
         fprintf(stderr, "(bmount)Error %d: %s\n", errno, strerror(errno));
         // return -1
-        return EXIT_FAILURE;
+        return -1;
     }
     // return 0
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 // Escribe 1 bloque en el dispositivo virtual,
@@ -49,7 +49,7 @@ int bwrite(unsigned int nbloque, const void *buf)
     if (desp == -1)
     {
         fprintf(stderr, "(bwrite, 1)Error %d: %s\n", errno, strerror(errno));
-        return EXIT_FAILURE;
+        return -1;
     }
     else
     {
