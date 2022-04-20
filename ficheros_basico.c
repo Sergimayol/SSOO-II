@@ -570,3 +570,48 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
     // nº de bloque físico correspondiente al bloque de datos lógico, nblogico
     return ptr;
 }
+
+// Libera un inodo
+int liberar_inodo(unsigned int ninodo)
+{
+    struct superbloque SB;
+    struct inodo inodo;
+
+    // Lectura inodo
+    leer_inodo(ninodo, &inodo);
+    // liberar todos los bloques del inodo y restar cantidad bloques liberados
+    inodo.numBloquesOcupados -= liberar_bloques_inodo(0, &inodo);
+    // Marcar el inodo como tipo libre y tamEnBytesLog = 0
+    inodo.tipo = 'l';
+    inodo.tamEnBytesLog = 0;
+    // Lectura del superbloque
+    if (bread(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    // primer inodo libre de la lista enlazada
+    inodo.punterosDirectos[0] = SB.posPrimerInodoLibre;
+    // Incluir inodo que queremos liberar en la lista de inodos libres
+    SB.posPrimerInodoLibre = ninodo;
+    // incrementar la cantidad de inodos libres
+    SB.cantInodosLibres++;
+    // escribir inodo
+    escribir_inodo(ninodo, inodo);
+    // escribir superbloque
+    if (bwrite(posSB, &SB) == -1)
+    {
+        return -1;
+    }
+    // devolver el num del inodo liberado
+    return ninodo;
+}
+
+//
+int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
+{
+}
+
+//
+int mi_truncar_f(unsigned int ninodo, unsigned int nbytes)
+{
+}
