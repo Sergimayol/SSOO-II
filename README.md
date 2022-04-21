@@ -1,7 +1,9 @@
 # SSOO-II
-## Nivel 1 ✓
-## Nivel 2 ✓
-## Nivel 3 ✓
-## Nivel 4 ✓
-## Nivel 5 ✓
-## Nivel 6
+### Niveles: 
+- [x] Nivel 1
+- [x] Nivel 2
+- [x] Nivel 3
+- [x] Nivel 4
+- [x] Nivel 5
+- [x] Nivel 6
+- [ ] Nivel 7
