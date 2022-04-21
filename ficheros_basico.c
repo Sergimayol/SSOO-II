@@ -370,7 +370,7 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos)
         return -1;
     }
     unsigned int posInodoReservado = SB.posPrimerInodoLibre;
-    if (lee_inodo(posInodoReservado, &inodoAux) == -1)
+    if (leer_inodo(posInodoReservado, &inodoAux) == -1)
     {
         return -1;
     }
@@ -507,7 +507,7 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
                 inodo.numBloquesOcupados++;
                 inodo.ctime = time(NULL); // fecha actual
                 // el bloque cuelga directamente del inodo
-                if (nivel_punteros = nRangoBL)
+                if (nivel_punteros == nRangoBL)
                 {
                     inodo.punterosIndirectos[nRangoBL - 1] = ptr; // (imprimirlo para test)
                 }
@@ -614,7 +614,7 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
     // nº de bloques liberados
     int nRangoBL, liberados = 0;
     // array de bloques de punteros
-    unsigned intbloques_punteros[3][NPUNTEROS];
+    unsigned int bloques_punteros[3][NPUNTEROS];
     // para llenar de 0s y comparar
     unsigned char bufAux_punteros[BLOCKSIZE];
     // punteros a bloques de punteros de cada nivel e indices de cada nivel

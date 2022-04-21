@@ -19,7 +19,7 @@ int main(int argc, char **argsv)
             return -1;
         }
         printSuperBloque();
-        printListaEnlazada();
+        // printListaEnlazada();
         printMapaBits();
         printTestBloque();
         printInodo();
@@ -32,6 +32,7 @@ int main(int argc, char **argsv)
     else
     {
         fprintf(stderr, "Not enough arguments\n");
+        return -1;
     }
     return 0;
 }
@@ -112,6 +113,7 @@ int printMapaBits()
     printf("leer_bit(%i) = %i\n", SB.posPrimerBloqueDatos, bit);
     bit = leer_bit(SB.posUltimoBloqueDatos);
     printf("leer_bit(%i) = %i\n", SB.posUltimoBloqueDatos, bit);
+    return 0;
 }
 
 int printTestBloque()
@@ -149,4 +151,5 @@ int printInodo()
     printf("nlinks: %i\n", inodo.nlinks);
     printf("tamaño en bytes lógicos: %i\n", inodo.tamEnBytesLog);
     printf("Número de bloques ocupados: %i\n", inodo.numBloquesOcupados);
+    return 0;
 }

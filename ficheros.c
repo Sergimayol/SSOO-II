@@ -4,7 +4,7 @@
 // de tamaño nbytes, en un fichero/directorio
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes)
 {
-    int primerBL, ultimoBL, desp1, desp2, nbfisico;
+    int primerBL, ultimoBL, desp1, desp2, nbfisico = 0;
     char buf_bloque[BLOCKSIZE];
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1)
@@ -27,11 +27,8 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     if (primerBL == ultimoBL)
     {
-        // A revisar
         memcpy(buf_bloque + desp1, buf_original, nbytes);
-
-        res = bwrite(nbfisico, buf_bloque);
-        if (res == -1)
+        if (bwrite(nbfisico, buf_bloque) == -1)
         {
             fprintf(stderr, "Error al escribir el superBloque. \n");
             return -1;
@@ -40,11 +37,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     }
     else
     {
-
         // Escribimos el 1er bloque
         memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);
-        res = bwrite(nbloqueFisico, buf_bloque);
-        if (res == -1)
+        if (bwrite(nbfisico, buf_bloque) == -1)
         {
             fprintf(stderr, "Error al escribir el superBloque \n");
             return -1;
@@ -54,12 +49,10 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
         // Escribimos los bloques intermedios
         int primerIntermedio = primerBL + 1;
-        while (primerIntermedio < ultimoBL)
+        for (int i = 0; primerIntermedio < ultimoBL; i++)
         {
-
-            nbloqueFisico = traducir_bloque_inodo(ninodo, i, 1);
-            res = bwrite(nbloqueFisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE);
-            if (res == -1)
+            nbfisico = traducir_bloque_inodo(ninodo, i, 1);
+            if (bwrite(nbfisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE) == -1)
             {
                 fprintf(stderr, "Error al escribir el superBloque \n");
                 return -1;
@@ -70,16 +63,14 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         // Ultimo bloque
         int nUltimobloqueFisico = traducir_bloque_inodo(ninodo, primerIntermedio, 1);
 
-        res = bread(nUltimobloqueFisico, buf_bloque);
-        if (res == -1)
+        if (bread(nUltimobloqueFisico, buf_bloque) == -1)
         {
             fprintf(stderr, "Error al leer el bloque \n");
             return -1;
         }
         memcpy(buf_bloque, buf_original + (nbytes - desp2 - 1), desp2 + 1);
 
-        res = bwrite(nbloqueFisico, buf_bloque);
-        if (res == -1)
+        if (bwrite(nbfisico, buf_bloque) == -1)
         {
             fprintf(stderr, "Error al escribir el superBloque \n");
             return -1;
@@ -94,7 +85,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 // ninodo, pasado como argumento) y la almacena en un buffer de memoria, buf_original
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes)
 {
-    char buf_bloque[BLOCKSIZE];
+    unsigned char buf_bloque[BLOCKSIZE];
     struct inodo inodo;
     int leidos;
 
@@ -124,7 +115,6 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     int desp1 = offset % BLOCKSIZE;
     int desp2 = (offset + nbytes - 1) % BLOCKSIZE;
     int nbytesLeidos = 0;
-    unsigned char buf_bloque[BLOCKSIZE];
 
     memset(buf_bloque, 0, sizeof(buf_bloque));
 
@@ -133,8 +123,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         int BF = traducir_bloque_inodo(ninodo, primerBL, 0);
         if (BF != -1)
         {
-            res = bread(BF, buf_bloque);
-            if (res == -1)
+            if (bread(BF, buf_bloque) == -1)
             {
                 fprintf(stderr, "Error al leer buf_bloque || mi_read_f() \n");
                 return -1;
@@ -149,8 +138,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         int nbloqueFisico = traducir_bloque_inodo(ninodo, primerBL, 0);
         if (nbloqueFisico != -1)
         {
-            res = bread(nbloqueFisico, buf_bloque);
-            if (res == -1)
+            if (bread(nbloqueFisico, buf_bloque) == -1)
             {
                 fprintf(stderr, "Error al lectura \n");
                 return -1;
@@ -165,8 +153,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             nbloqueFisico = traducir_bloque_inodo(ninodo, i, 0);
             if (nbloqueFisico != -1)
             {
-                res = bread(nbloqueFisico, buf_bloque);
-                if (res == -1)
+                if (bread(nbloqueFisico, buf_bloque) == -1)
                 {
                     fprintf(stderr, "Error al lectura \n");
                     return -1;
@@ -180,8 +167,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         nbloqueFisico = traducir_bloque_inodo(ninodo, ultimoBL, 0);
         if (nbloqueFisico != 1)
         {
-            res = bread(nbloqueFisico, buf_bloque);
-            if (res == -1)
+            if (bread(nbloqueFisico, buf_bloque) == -1)
             {
                 fprintf(stderr, "Error al lectura \n");
                 return -1;
@@ -198,8 +184,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         return -1;
     }
     inodo.atime = time(NULL);
-    res = escribir_inodo(ninodo, inodo);
-    if (res == -1)
+    if (escribir_inodo(ninodo, inodo) == -1)
     {
         fprintf(stderr, "Error al escritura inodo || mi_read_f() \n");
         return -1;
@@ -239,8 +224,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos)
 {
     struct inodo inodo;
 
-    int res = leer_inodo(ninodo, &inodo);
-    if (res == -1)
+    if (leer_inodo(ninodo, &inodo) == -1)
     {
         fprintf(stderr, "Error al lectura inodo \n");
         return -1;
@@ -249,8 +233,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos)
     inodo.permisos = permisos;
     inodo.ctime = time(NULL);
 
-    res = escribir_inodo(ninodo, &inodo);
-    if (res == -1)
+    if (escribir_inodo(ninodo, inodo) == -1)
     {
         fprintf(stderr, "Error al escribir inodo \n");
         return -1;
