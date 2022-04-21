@@ -75,4 +75,3 @@ int traducir_bloque_inodo(unsigned int ninodo, unsigned int nblogico, unsigned c
 
 int liberar_inodo(unsigned int ninodo);
 int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo);
-int mi_truncar_f(unsigned int ninodo, unsigned int nbytes);
