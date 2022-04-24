@@ -14,7 +14,6 @@ int main(int argc, char **argv)
     // Comprobar si los parámetros son correctos
     if (argc == 3)
     {
-        umask(0);
         if (bmount(argv[1]) == -1)
         {
             // Error

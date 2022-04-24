@@ -4,7 +4,7 @@ int main(int argc, char **argv)
 {
 	if (argv[1] == NULL || argv[2] == NULL || argv[3] == NULL)
 	{ // dir ninodo permisos
-		fprintf(stderr, "Error de sintaxis, la sintaxis correcta es: permitir <nombre_dispositivo> <ninodo> <permisos>\n");
+		fprintf(stderr, "Sintaxis: permitir <nombre_dispositivo> <ninodo> <permisos>\n");
 		return -1;
 	}
 

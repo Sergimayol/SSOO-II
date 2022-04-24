@@ -20,9 +20,10 @@ int main(int argc, char **argv)
 	int diferentes_inodos = atoi(argv[3]);
 	int longitud = strlen(argv[2]);
 	int offsets[5] = {9000, 209000, 30725000, 409605000, 480000000};
-
-	bmount(argv[1]);
-
+	if (bmount(argv[1]) == -1)
+	{
+		return -1;
+	}
 	printf("\n\nOffsets: 9000, 209000, 30725000, 409605000, 480000000\n");
 	printf("longitud texto: %d\n", longitud);
 
@@ -48,8 +49,10 @@ int main(int argc, char **argv)
 		printf("Bytes escritos: %d\n\n", bytesEscritos);
 		printSTAT(inodo_reservado);
 	}
-
-	bumount();
+	if (bumount() == -1)
+	{
+		return -1;
+	}
 
 	return 0;
 }

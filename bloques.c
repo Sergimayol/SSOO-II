@@ -12,12 +12,12 @@ int bmount(const char *camino)
     {
         close(descriptor);
     }
+    umask(000);
     // Permisos rw-rw-rw (6-6-6)
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
     if (descriptor == -1)
     {
         fprintf(stderr, "(bmount(*c))Error %d: %s\n", errno, strerror(errno));
-        // error (return -1)
         return -1;
     }
     return descriptor;
@@ -32,10 +32,8 @@ int bumount()
     if (descriptor == -1)
     {
         fprintf(stderr, "(bmount)Error %d: %s\n", errno, strerror(errno));
-        // return -1
         return -1;
     }
-    // return 0
     return 0;
 }
 
@@ -60,7 +58,7 @@ int bwrite(unsigned int nbloque, const void *buf)
         {
             fprintf(stderr, "(bwrite, 2)Error %d: %s\n", errno, strerror(errno));
             // Se ha producido un error al escribir
-            return EXIT_FAILURE;
+            return -1;
         }
         else
         {
@@ -80,7 +78,7 @@ int bread(unsigned int nbloque, void *buf)
     if (desp == -1)
     {
         fprintf(stderr, "(bread, 1)Error %d: %s\n", errno, strerror(errno));
-        return EXIT_FAILURE;
+        return -1;
     }
     else
     {
@@ -89,7 +87,7 @@ int bread(unsigned int nbloque, void *buf)
         {
             fprintf(stderr, "(bread, 2)Error %d: %s\n", errno, strerror(errno));
             // Se ha producido un error al leer
-            return EXIT_FAILURE;
+            return -1;
         }
         else
         {

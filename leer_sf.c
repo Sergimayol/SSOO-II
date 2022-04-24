@@ -15,7 +15,7 @@ int main(int argc, char **argsv)
     {
         if (bmount(argsv[1]) == -1)
         {
-            fprintf(stderr, "Error while mounting\n");
+            fprintf(stderr, "Error montando dispositivo virtual.\n");
             return -1;
         }
         printSuperBloque();
@@ -25,13 +25,13 @@ int main(int argc, char **argsv)
         printInodo();
         if (bumount() == -1)
         {
-            fprintf(stderr, "Error while unmounting\n");
+            fprintf(stderr, "Error desmontando dispositivo virtual.\n");
             return -1;
         }
     }
     else
     {
-        fprintf(stderr, "Not enough arguments\n");
+        fprintf(stderr, "Error sintaxis: ./leer_sf <nombre_dispositivo>\n");
         return -1;
     }
     return 0;
