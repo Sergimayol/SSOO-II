@@ -363,7 +363,7 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos)
     {
         return -1;
     }
-    if (SB.cantInodosLibres < 1)
+    if (SB.cantInodosLibres == 0)
     {
         return -1;
     }
