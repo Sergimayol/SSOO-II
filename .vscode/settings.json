@@ -1,6 +1,14 @@
 {
-    "files.associations": {
-        "bloques.h": "c",
-        "ficheros_basico.h": "c"
-    }
+  "files.associations": {
+    "bloques.h": "c",
+    "ficheros_basico.h": "c",
+    "ficheros.h": "c"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[c]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  },
+  "[h]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  }
 }
