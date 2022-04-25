@@ -4,7 +4,7 @@
 // de tamaño nbytes, en un fichero/directorio
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes)
 {
-    int primerBL, ultimoBL, desp1, desp2, nbfisico = 0;
+    int primerBL, ultimoBL, desp1, desp2, nbfisico = 0, nbytesEscritos = 0, auxbytesEscritos = 0;
     char buf_bloque[BLOCKSIZE];
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == -1)
@@ -16,69 +16,98 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     {
         // Error de permiso
         fprintf(stderr, "Error: Permiso de escritura denegado. \n");
-        return 0;
+        return -1;
     }
     primerBL = offset / BLOCKSIZE;
     ultimoBL = (offset + nbytes - 1) / BLOCKSIZE;
     desp1 = offset % BLOCKSIZE;
     desp2 = (offset + nbytes - 1) % BLOCKSIZE;
 
-    int nbytesEscritos = 0;
+    // Obtencion del numero de bloque fisico
+    nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
+    if (nbfisico == -1)
+    {
+        return -1;
+    }
+    // Leemos el bloque fisico
+    if (bread(nbfisico, buf_bloque) == -1)
+    {
+        return -1;
+    }
 
     if (primerBL == ultimoBL)
     {
         memcpy(buf_bloque + desp1, buf_original, nbytes);
         if (bwrite(nbfisico, buf_bloque) == -1)
         {
-            fprintf(stderr, "Error al escribir el superBloque. \n");
             return -1;
         }
-        nbytesEscritos = nbytes;
+        nbytesEscritos += nbytes;
     }
-    else
+    else if (primerBL < ultimoBL)
     {
         // Escribimos el 1er bloque
         memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);
-        if (bwrite(nbfisico, buf_bloque) == -1)
+        auxbytesEscritos = bwrite(nbfisico, buf_bloque);
+        if (auxbytesEscritos == -1)
         {
-            fprintf(stderr, "Error al escribir el superBloque \n");
             return -1;
         }
 
-        nbytesEscritos = BLOCKSIZE - desp1;
+        nbytesEscritos += BLOCKSIZE - desp1;
 
         // Escribimos los bloques intermedios
-        int primerIntermedio = primerBL + 1;
-        for (int i = 0; primerIntermedio < ultimoBL; i++)
+        for (int i = primerBL + 1; i < ultimoBL; i++)
         {
             nbfisico = traducir_bloque_inodo(ninodo, i, 1);
             if (bwrite(nbfisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE) == -1)
             {
-                fprintf(stderr, "Error al escribir el superBloque \n");
                 return -1;
             }
             nbytesEscritos += BLOCKSIZE;
-            primerIntermedio++;
         }
         // Ultimo bloque
-        int nUltimobloqueFisico = traducir_bloque_inodo(ninodo, primerIntermedio, 1);
+        int nUltimobloqueFisico = traducir_bloque_inodo(ninodo, ultimoBL, 1);
+        if (nUltimobloqueFisico == -1)
+        {
+            return -1;
+        }
 
         if (bread(nUltimobloqueFisico, buf_bloque) == -1)
         {
-            fprintf(stderr, "Error al leer el bloque \n");
             return -1;
         }
         memcpy(buf_bloque, buf_original + (nbytes - desp2 - 1), desp2 + 1);
 
         if (bwrite(nbfisico, buf_bloque) == -1)
         {
-            fprintf(stderr, "Error al escribir el superBloque \n");
             return -1;
         }
 
         nbytesEscritos += desp2 + 1;
     }
-    return 0;
+    // Leer el inodo actualizado.
+    if (leer_inodo(ninodo, &inodo) == -1)
+    {
+        return -1;
+    }
+
+    // Actualizar la metainformación
+    if (inodo.tamEnBytesLog < (nbytes + offset))
+    {
+        inodo.tamEnBytesLog = nbytes + offset;
+        inodo.ctime = time(NULL);
+    }
+    inodo.mtime = time(NULL);
+    if (escribir_inodo(ninodo, inodo) == -1)
+    {
+        return -1;
+    }
+    if (nbytes != nbytesEscritos)
+    {
+        return -1;
+    }
+    return nbytesEscritos;
 }
 
 // Lee información de un fichero/directorio (correspondiente al nº de inodo,
