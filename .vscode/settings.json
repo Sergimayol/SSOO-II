@@ -1,14 +1,22 @@
 {
   "files.associations": {
+    "*.c": "c",
+    "cstdlib": "c",
     "bloques.h": "c",
     "ficheros_basico.h": "c",
-    "ficheros.h": "c"
+    "ficheros.h": "c",
+    "stdlib.h": "c"
   },
+  "C_Cpp.errorSquiggles": "Disabled",
+  "C_Cpp.dimInactiveRegions": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[c]": {
     "editor.defaultFormatter": "ms-vscode.cpptools"
   },
   "[h]": {
     "editor.defaultFormatter": "ms-vscode.cpptools"
+  },
+  "[shellscript]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
   }
 }
