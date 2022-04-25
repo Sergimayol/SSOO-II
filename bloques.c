@@ -8,16 +8,11 @@ static int descriptor = 0;
 // trata de un fichero, esa acción consistirá en abrirlo.
 int bmount(const char *camino)
 {
-    if (descriptor > 0)
-    {
-        close(descriptor);
-    }
     umask(000);
     // Permisos rw-rw-rw (6-6-6)
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
     if (descriptor == -1)
     {
-        fprintf(stderr, "(bmount(*c))Error %d: %s\n", errno, strerror(errno));
         return -1;
     }
     return descriptor;
@@ -31,7 +26,6 @@ int bumount()
     descriptor = close(descriptor);
     if (descriptor == -1)
     {
-        fprintf(stderr, "(bmount)Error %d: %s\n", errno, strerror(errno));
         return -1;
     }
     return 0;
@@ -43,10 +37,9 @@ int bwrite(unsigned int nbloque, const void *buf)
 {
     // lseek: desplazamiento en el gestor de ficheros al bloque deseado
     // SEEK_SET = punto de referencia, desde el inicio del fichero
-    off_t desp = lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET);
-    if (desp == -1)
+    if (lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET) == -1)
     {
-        fprintf(stderr, "(bwrite, 1)Error %d: %s\n", errno, strerror(errno));
+        fprintf(stderr, "(bwrite, 1) --> Error %d: %s\n", errno, strerror(errno));
         return -1;
     }
     else
@@ -56,15 +49,12 @@ int bwrite(unsigned int nbloque, const void *buf)
         //(si ha ido bien, será BLOCKSIZE), o -1 (o EXIT_FAILURE) si se produce un error.
         if (bloquesW == -1)
         {
-            fprintf(stderr, "(bwrite, 2)Error %d: %s\n", errno, strerror(errno));
+            fprintf(stderr, "(bwrite, 2) --> Error %d: %s\n", errno, strerror(errno));
             // Se ha producido un error al escribir
             return -1;
         }
-        else
-        {
-            // Se devuelven el num de bloques escritos
-            return bloquesW;
-        }
+        // Se devuelven el num de bloques escritos
+        return bloquesW;
     }
 }
 
@@ -74,8 +64,7 @@ int bread(unsigned int nbloque, void *buf)
 {
     // lseek: despplazamiento en el gestor de ficheros al bloque deseado
     // SEEK_SET = punto de referencia, desde el inicio del fichero
-    off_t desp = lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET);
-    if (desp == -1)
+    if (lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET) == -1)
     {
         fprintf(stderr, "(bread, 1)Error %d: %s\n", errno, strerror(errno));
         return -1;
@@ -89,10 +78,7 @@ int bread(unsigned int nbloque, void *buf)
             // Se ha producido un error al leer
             return -1;
         }
-        else
-        {
-            // Se devuelven el num de bloques leidos
-            return bloqueL;
-        }
+        // Se devuelven el num de bloques leidos
+        return bloqueL;
     }
 }

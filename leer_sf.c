@@ -19,10 +19,12 @@ int main(int argc, char **argsv)
             return -1;
         }
         printSuperBloque();
-        // printListaEnlazada();
-        printMapaBits();
-        printTestBloque();
-        printInodo();
+        // printf("sizeof struct superbloque: %li\n", sizeof(struct superbloque));
+        // printf("sizeof struct inodo: %li\n\n", sizeof(struct inodo));
+        //  printListaEnlazada();
+        //  printMapaBits();
+        //  printTestBloque();
+        //  printInodo();
         if (bumount() == -1)
         {
             fprintf(stderr, "Error desmontando dispositivo virtual.\n");
@@ -39,10 +41,8 @@ int main(int argc, char **argsv)
 
 int printSuperBloque()
 {
-
-    if (bread(posSB, &SB) == -1)
+    if (bread(0, &SB) == -1)
     {
-        fprintf(stderr, "Error while reading\n");
         return -1;
     }
     printf("DATOS DEL SUPERBLOQUE\n");
@@ -58,8 +58,6 @@ int printSuperBloque()
     printf("cantInodosLibres: %i\n", SB.cantInodosLibres);
     printf("totBloques: %i\n", SB.totBloques);
     printf("totInodos: %i\n\n", SB.totInodos);
-    printf("sizeof struct superbloque: %li\n", sizeof(struct superbloque));
-    printf("sizeof struct inodo: %li\n\n", sizeof(struct inodo));
     return 0;
 }
 
