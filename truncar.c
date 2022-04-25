@@ -22,14 +22,6 @@ int main(int argc, char **argv)
     int ninodo = atoi(argv[2]);
     int nbytes = atoi(argv[3]);
     (nbytes == 0) ? liberar_inodo(ninodo) : mi_truncar_f(ninodo, nbytes);
-    /*if (nbytes == 0)
-    {
-        liberar_inodo(ninodo);
-    }
-    else
-    {
-        mi_truncar_f(ninodo, nbytes);
-    }*/
     // Comprobar datos inodo son correctos
     mi_stat_f(ninodo, &aux_stat);
     printf("DATOS INODO: %d\n", ninodo);

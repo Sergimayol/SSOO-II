@@ -31,13 +31,13 @@ int main(int argc, char **argv)
         unsigned char buffer[BLOCKSIZE];
         // Bloque vacio
         memset(buffer, 0, BLOCKSIZE);
-        for (size_t i = 0; i < nbloques; i++)
+        for (int i = 0; i < nbloques; i++)
         {
             if (bwrite(i, buffer) == -1)
             {
                 // error
                 fprintf(stderr, "(mi_mkfs,bwrite)Error %d: %s\n", errno, strerror(errno));
-                fprintf(stderr, "Error escribiendo bloque (%zu).\n", i);
+                fprintf(stderr, "Error escribiendo bloque (%d).\n", i);
                 return -1;
             }
         }
