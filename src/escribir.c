@@ -1,3 +1,10 @@
+/*
+Miembros:
+ - Sergi Mayol Matos
+ - Alejandro Rodríguez Arguimbau  
+ - Carlos Galardon Burges
+*/
+
 #include "ficheros.h"
 
 int main(int argc, char **argv)

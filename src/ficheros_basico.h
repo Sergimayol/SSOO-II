@@ -1,3 +1,10 @@
+/*
+Miembros:
+ - Sergi Mayol Matos
+ - Alejandro Rodríguez Arguimbau  
+ - Carlos Galardon Burges
+*/
+
 #include "bloques.h"
 #include <limits.h>
 #include <time.h>

@@ -1,3 +1,10 @@
+/*
+Miembros:
+ - Sergi Mayol Matos
+ - Alejandro Rodríguez Arguimbau  
+ - Carlos Galardon Burges
+*/
+
 #include "ficheros_basico.h"
 
 // Nivel 6

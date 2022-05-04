@@ -1,3 +1,10 @@
+/*
+Miembros:
+ - Sergi Mayol Matos
+ - Alejandro Rodríguez Arguimbau  
+ - Carlos Galardon Burges
+*/
+
 #include "ficheros.h"
 
 // Escribe el contenido procedente de un buffer de memoria, buf_original,

@@ -1,3 +1,10 @@
+/*
+Miembros:
+ - Sergi Mayol Matos
+ - Alejandro Rodríguez Arguimbau  
+ - Carlos Galardon Burges
+*/
+
 #include "bloques.h"
 
 // Descriptor del fichero alamcenado como variable global estática,
