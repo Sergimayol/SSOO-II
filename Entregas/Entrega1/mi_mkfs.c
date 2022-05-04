@@ -2,7 +2,6 @@
 Miembros:
  - Sergi Mayol Matos
  - Alejandro Rodríguez Arguimbau  
- - Carlos Galardon Burges
 */
 
 /* El programa mi_mkfs.c sirve para formatear el dispositivo

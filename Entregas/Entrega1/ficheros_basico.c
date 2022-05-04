@@ -2,7 +2,6 @@
 Miembros:
  - Sergi Mayol Matos
  - Alejandro Rodríguez Arguimbau  
- - Carlos Galardon Burges
 */
 
 #include "ficheros_basico.h"
@@ -67,7 +66,7 @@ int initMB()
         return -1;
     }
     // Inicializacion mapa bits
-    for (size_t i = SB.posPrimerBloqueMB; i < SB.posUltimoBloqueMB; i++)
+    for (int i = SB.posPrimerBloqueMB; i < SB.posUltimoBloqueMB; i++)
     {
         if (bwrite(i, buffer) == -1)
         {
@@ -98,10 +97,10 @@ int initAI()
     //+1 porque hemos iniciado SB.posPrimerInodoLibre = 0
     contInodos = SB.posPrimerInodoLibre + 1;
     // Para cada bloque del AI
-    for (size_t i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++)
+    for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++)
     {
         // Para cada inodo del AI
-        for (size_t j = 0; j < (BLOCKSIZE / INODOSIZE); j++)
+        for (int j = 0; j < (BLOCKSIZE / INODOSIZE); j++)
         {
             inodos[j].tipo = 'l'; // libre
             // Si no hemos llegado al último inodo

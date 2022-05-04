@@ -2,7 +2,6 @@
 Miembros:
  - Sergi Mayol Matos
  - Alejandro Rodríguez Arguimbau  
- - Carlos Galardon Burges
 */
 
 #include "ficheros_basico.h"
@@ -53,18 +52,18 @@ int printSuperBloque()
         return -1;
     }
     printf("DATOS DEL SUPERBLOQUE\n");
-    printf("posPrimerBloqueMB: %i\n", SB.posPrimerBloqueMB);
-    printf("posUltimoBloqueMB: %i\n", SB.posUltimoBloqueMB);
-    printf("posPrimerBloqueAI: %i\n", SB.posPrimerBloqueAI);
-    printf("posUltimoBloqueAI: %i\n", SB.posUltimoBloqueAI);
-    printf("posPrimerBloqueDatos: %i\n", SB.posPrimerBloqueDatos);
-    printf("posUltimoBloqueDatos: %i\n", SB.posUltimoBloqueDatos);
-    printf("posInodoRaíz: %i\n", SB.posInodoRaiz);
-    printf("posPrimerInodoLibre: %i\n", SB.posPrimerInodoLibre);
-    printf("cantBloquesLibres: %i\n", SB.cantBloquesLibres);
-    printf("cantInodosLibres: %i\n", SB.cantInodosLibres);
-    printf("totBloques: %i\n", SB.totBloques);
-    printf("totInodos: %i\n\n", SB.totInodos);
+    printf("posPrimerBloqueMB: %d\n", SB.posPrimerBloqueMB);
+    printf("posUltimoBloqueMB: %d\n", SB.posUltimoBloqueMB);
+    printf("posPrimerBloqueAI: %d\n", SB.posPrimerBloqueAI);
+    printf("posUltimoBloqueAI: %d\n", SB.posUltimoBloqueAI);
+    printf("posPrimerBloqueDatos: %d\n", SB.posPrimerBloqueDatos);
+    printf("posUltimoBloqueDatos: %d\n", SB.posUltimoBloqueDatos);
+    printf("posInodoRaíz: %d\n", SB.posInodoRaiz);
+    printf("posPrimerInodoLibre: %d\n", SB.posPrimerInodoLibre);
+    printf("cantBloquesLibres: %d\n", SB.cantBloquesLibres);
+    printf("cantInodosLibres: %d\n", SB.cantInodosLibres);
+    printf("totBloques: %d\n", SB.totBloques);
+    printf("totInodos: %d\n\n", SB.totInodos);
     return 0;
 }
 
