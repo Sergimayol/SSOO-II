@@ -10,6 +10,7 @@
   "C_Cpp.errorSquiggles": "Disabled",
   "C_Cpp.dimInactiveRegions": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
   "[c]": {
     "editor.defaultFormatter": "ms-vscode.cpptools"
   },
