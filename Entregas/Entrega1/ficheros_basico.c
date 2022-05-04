@@ -8,7 +8,7 @@ Miembros:
 
 #define DEBUG3 0 // Debugger del nivel 3
 #define DEBUG4 1 // Debugger del nivel 4
-#define DEBUG6 0 // Debugger del nivel 6
+#define DEBUG6 1 // Debugger del nivel 6
 
 // Calcula el tamaño en bloques necesario para el mapa de bits.
 int tamMB(unsigned int nbloques)
@@ -672,6 +672,10 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
         ultimoBL = (inodo->tamEnBytesLog) / BLOCKSIZE;
     }
     memset(bufAux_punteros, 0, BLOCKSIZE);
+
+#if DEBUG6
+    printf("[liberar_bloques_inodo()-> primerBL: %d, ultimoBL: %d]\n", primerBL, ultimoBL);
+#endif
     // recorrido BLs
     for (nBL = primerBL; nBL <= ultimoBL; nBL++)
     {
@@ -704,6 +708,9 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
         {
             liberar_bloque(ptr);
             liberados++;
+#if DEBUG6
+            printf("[liberar_bloques_inodo()-> liberado BF %d de datos par a BL %d]\n", ptr, nBL);
+#endif
             // es un puntero Directo
             if (nRangoBL == 0)
             {
@@ -722,6 +729,9 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
                         // No cuelgan más bloques ocupados, hay que liberar el bloque de punteros
                         liberar_bloque(ptr);
                         liberados++;
+#if DEBUG6
+                        printf("[liberar_bloques_inodo()→ liberado BF %i de punteros_nivel%i correspondiente al BL: %i]\n", ptr, nivel_punteros, nBL);
+#endif
                         if (nivel_punteros == nRangoBL)
                         {
                             inodo->punterosIndirectos[nRangoBL - 1] = 0;
@@ -743,6 +753,9 @@ int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo)
             }
         }
     }
+#if DEBUG6
+    printf("[liberar_bloques_inodo()-> total bloques liberados: %d]\n", liberados);
+#endif
     // return numero bloques liberados
     return liberados;
 }
