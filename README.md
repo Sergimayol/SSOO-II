@@ -41,6 +41,8 @@
 ├── src
 │   ├── bloques.c
 │   ├── bloques.h
+│   ├── directorios.c
+│   ├── directorios.h
 │   ├── escribir.c
 │   ├── ficheros.c
 │   ├── ficheros.h

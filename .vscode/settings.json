@@ -5,7 +5,8 @@
     "bloques.h": "c",
     "ficheros_basico.h": "c",
     "ficheros.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "directorios.h": "c"
   },
   "C_Cpp.errorSquiggles": "Disabled",
   "C_Cpp.dimInactiveRegions": false,
@@ -19,5 +20,8 @@
   },
   "[shellscript]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+  "[cpp]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
   }
 }

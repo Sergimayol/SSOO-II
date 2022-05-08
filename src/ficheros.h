@@ -1,8 +1,7 @@
 /*
 Miembros:
  - Sergi Mayol Matos
- - Alejandro Rodríguez Arguimbau  
- - Carlos Galardon Burges
+ - Alejandro Rodríguez Arguimbau
 */
 
 #include "ficheros_basico.h"
