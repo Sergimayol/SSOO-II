@@ -21,6 +21,5 @@ struct entrada
 #define ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO -7
 
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo);
-
 int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsigned int *p_inodo, unsigned int *p_entrada, char reservar, unsigned char permisos);
-void mostrar_error_buscar_entrada(int error)
+void mostrar_error_buscar_entrada(int error);
