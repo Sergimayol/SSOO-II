@@ -178,32 +178,30 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
 */
 void mostrar_error_buscar_entrada(int error)
 {
+
     switch (error)
     {
-        switch (error)
-        {
-        case -1:
-            fprintf(stderr, "Error: Camino incorrecto.\n");
-            break;
-        case -2:
-            fprintf(stderr, "Error: Permiso denegado de lectura.\n");
-            break;
-        case -3:
-            fprintf(stderr, "Error: No existe el archivo o el directorio.\n");
-            break;
-        case -4:
-            fprintf(stderr, "Error: No existe algún directorio intermedio.\n");
-            break;
-        case -5:
-            fprintf(stderr, "Error: Permiso denegado de escritura.\n");
-            break;
-        case -6:
-            fprintf(stderr, "Error: El archivo ya existe.\n");
-            break;
-        case -7:
-            fprintf(stderr, "Error: No es un directorio.\n");
-            break;
-        }
+    case -1:
+        fprintf(stderr, "Error: Camino incorrecto.\n");
+        break;
+    case -2:
+        fprintf(stderr, "Error: Permiso denegado de lectura.\n");
+        break;
+    case -3:
+        fprintf(stderr, "Error: No existe el archivo o el directorio.\n");
+        break;
+    case -4:
+        fprintf(stderr, "Error: No existe algún directorio intermedio.\n");
+        break;
+    case -5:
+        fprintf(stderr, "Error: Permiso denegado de escritura.\n");
+        break;
+    case -6:
+        fprintf(stderr, "Error: El archivo ya existe.\n");
+        break;
+    case -7:
+        fprintf(stderr, "Error: No es un directorio.\n");
+        break;
     }
 }
 
