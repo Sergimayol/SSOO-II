@@ -5,6 +5,7 @@ Miembros:
 */
 
 #include "directorios.h"
+#include <string.h>
 
 #define DEBUG7 1 // Debugger del nivel 7
 
@@ -23,7 +24,7 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo)
     if (res)
     {
         // Copiamos todo en inicial menos el resto
-        strncpy(inicial, (camino + 1), (strlen(camino) - strlen(rest) - 1));
+        strncpy(inicial, (camino + 1), (strlen(camino) - strlen(res) - 1));
         // Copiamos el resto en final
         strcpy(final, res);
         // Tipo: directorio
