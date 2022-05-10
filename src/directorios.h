@@ -3,7 +3,8 @@ Miembros:
  - Sergi Mayol Matos
  - Alejandro Rodríguez Arguimbau
 */
-#include "bloques.h"
+
+#include "ficheros.h"
 
 #define TAMNOMBRE 60 // tamaño del nombre de directorio o fichero, en Ext2 = 256
 

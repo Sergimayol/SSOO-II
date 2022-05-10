@@ -7,8 +7,8 @@ Miembros:
 #include "ficheros_basico.h"
 
 #define DEBUG3 0 // Debugger del nivel 3
-#define DEBUG4 1 // Debugger del nivel 4
-#define DEBUG6 1 // Debugger del nivel 6
+#define DEBUG4 0 // Debugger del nivel 4
+#define DEBUG6 0 // Debugger del nivel 6
 
 // Calcula el tamaño en bloques necesario para el mapa de bits.
 int tamMB(unsigned int nbloques)

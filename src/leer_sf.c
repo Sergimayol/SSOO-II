@@ -4,14 +4,13 @@ Miembros:
  - Alejandro Rodríguez Arguimbau
 */
 
-#include "ficheros_basico.h"
 #include "directorios.h"
 
 #define DEBUG1 0 // Debugger del nivel 1
 #define DEBUG2 0 // Debugger del nivel 2
 #define DEBUG3 0 // Debugger del nivel 3
 #define DEBUG4 0 // Debugger del nivel 4
-#define DEBUGMEE 1
+#define DEBUG7 1 // Debugger del nivel 4
 
 struct superbloque SB;
 struct inodo inodos[BLOCKSIZE / INODOSIZE];
@@ -21,21 +20,7 @@ int printListaEnlazada();
 int printMapaBits();
 int printInodo();
 int printTraducirBloqueInodo();
-
-void mostrar_buscar_entrada(char *camino, char reservar)
-{
-    unsigned int p_inodo_dir = 0;
-    unsigned int p_inodo = 0;
-    unsigned int p_entrada = 0;
-    int error;
-    printf("\ncamino: %s, reservar: %d\n", camino, reservar);
-    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6)) < 0)
-    {
-        mostrar_error_buscar_entrada(error);
-    }
-    printf("**********************************************************************\n");
-    return;
-}
+void mostrar_buscar_entrada(char *camino, char reservar);
 
 int main(int argc, char **argsv)
 {
@@ -48,22 +33,6 @@ int main(int argc, char **argsv)
         }
 
         printSuperBloque();
-#if DEBUGMEE
-        // Mostrar creación directorios y errores
-        mostrar_buscar_entrada("pruebas/", 1);           // ERROR_CAMINO_INCORRECTO
-        mostrar_buscar_entrada("/pruebas/", 0);          // ERROR_NO_EXISTE_ENTRADA_CONSULTA
-        mostrar_buscar_entrada("/pruebas/docs/", 1);     // ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO
-        mostrar_buscar_entrada("/pruebas/", 1);          // creamos /pruebas/
-        mostrar_buscar_entrada("/pruebas/docs/", 1);     // creamos /pruebas/docs/
-        mostrar_buscar_entrada("/pruebas/docs/doc1", 1); // creamos /pruebas/docs/doc1
-        mostrar_buscar_entrada("/pruebas/docs/doc1/doc11", 1);
-        // ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO
-        mostrar_buscar_entrada("/pruebas/", 1);          // ERROR_ENTRADA_YA_EXISTENTE
-        mostrar_buscar_entrada("/pruebas/docs/doc1", 0); // consultamos /pruebas/docs/doc1
-        mostrar_buscar_entrada("/pruebas/docs/doc1", 1); // creamos /pruebas/docs/doc1
-        mostrar_buscar_entrada("/pruebas/casos/", 1);    // creamos /pruebas/casos/
-        mostrar_buscar_entrada("/pruebas/docs/doc2", 1); // creamos /pruebas/docs/doc2
-#endif
 #if DEBUG2
         printListaEnlazada();
 #endif
@@ -81,7 +50,22 @@ int main(int argc, char **argsv)
 #if DEBUG4
         printTraducirBloqueInodo();
 #endif
-
+#if DEBUG7
+        // Mostrar creación directorios y errores
+        mostrar_buscar_entrada("pruebas/", 1);           // ERROR_CAMINO_INCORRECTO
+        mostrar_buscar_entrada("/pruebas/", 0);          // ERROR_NO_EXISTE_ENTRADA_CONSULTA
+        mostrar_buscar_entrada("/pruebas/docs/", 1);     // ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO
+        mostrar_buscar_entrada("/pruebas/", 1);          // creamos /pruebas/
+        mostrar_buscar_entrada("/pruebas/docs/", 1);     // creamos /pruebas/docs/
+        mostrar_buscar_entrada("/pruebas/docs/doc1", 1); // creamos /pruebas/docs/doc1
+        mostrar_buscar_entrada("/pruebas/docs/doc1/doc11", 1);
+        // ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO
+        mostrar_buscar_entrada("/pruebas/", 1);          // ERROR_ENTRADA_YA_EXISTENTE
+        mostrar_buscar_entrada("/pruebas/docs/doc1", 0); // consultamos /pruebas/docs/doc1
+        mostrar_buscar_entrada("/pruebas/docs/doc1", 1); // creamos /pruebas/docs/doc1
+        mostrar_buscar_entrada("/pruebas/casos/", 1);    // creamos /pruebas/casos/
+        mostrar_buscar_entrada("/pruebas/docs/doc2", 1); // creamos /pruebas/docs/doc2
+#endif
         if (bumount() == -1)
         {
             fprintf(stderr, "Error desmontando dispositivo virtual.\n");
@@ -94,6 +78,21 @@ int main(int argc, char **argsv)
         return -1;
     }
     return 0;
+}
+
+void mostrar_buscar_entrada(char *camino, char reservar)
+{
+    unsigned int p_inodo_dir = 0;
+    unsigned int p_inodo = 0;
+    unsigned int p_entrada = 0;
+    int error;
+    printf("\ncamino: %s, reservar: %d\n", camino, reservar);
+    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6)) < 0)
+    {
+        mostrar_error_buscar_entrada(error);
+    }
+    printf("**********************************************************************\n");
+    return;
 }
 
 int printSuperBloque()

@@ -5,10 +5,8 @@ Miembros:
 */
 
 #include "directorios.h"
-#include <string.h>
-#include <stdio.h>
-#include "ficheros.h"
-#define DEBUG7 1 // Debugger del nivel 7
+
+#define DEBUG 1 // Debugger del nivel 7
 
 //
 int extraer_camino(const char *camino, char *inicial, char *final, char *tipo)
@@ -39,8 +37,8 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo)
         strcpy(tipo, "f");
         strcpy(final, "");
     }
-#if DEBUG7
-    fprintf(stderr, "\tCamino: %s\n\tInicio: %s\n\tFinal: %s\n\tTipo: %s\n", camino, inicial, final, tipo);
+#if DEBUG
+    // fprintf(stderr, "Camino: %s\nInicio: %s\nFinal: %s\nTipo: %s\n", camino, inicial, final, tipo);
 #endif
     return 0;
 }
@@ -68,13 +66,20 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         return 0;
     }
     if (extraer_camino(camino_parcial, inicial, final, tipo) == -1)
+    {
         return ERROR_CAMINO_INCORRECTO;
+    }
+#if DEBUG
+    printf("[buscar_entrada()->inicial: %s, final: %s, reservar: %d]\n", inicial,
+           final, reservar);
+#endif
     if (leer_inodo(*p_inodo_dir, &inodo_dir) == -1)
-        return EXIT_FAILURE;
-
+    {
+        return -1;
+    }
     if ((inodo_dir.permisos & 4) != 4)
     {
-#if DEBUG7
+#if DEBUG
         fprintf(stderr, "[buscar_entrada()→ El inodo %d no tiene permisos de lectura]\n", *p_inodo_dir);
 #endif
         return ERROR_PERMISO_LECTURA;
@@ -107,14 +112,14 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         case 1: // modo escritura
             if (inodo_dir.tipo == 'f')
             {
-#if DEBUG7
+#if DEBUG
                 fprintf(stderr, "[buscar_entrada()→ No se puede crear entrada en un fichero]\n");
 #endif
                 return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
             }
             if ((inodo_dir.permisos & 2) != 2)
             {
-#if DEBUG7
+#if DEBUG
                 fprintf(stderr, "[buscar_entrada()→ El inodo %d no tiene permisos de escritura]\n", *p_inodo_dir);
 #endif
                 return ERROR_PERMISO_ESCRITURA;
@@ -125,7 +130,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
                 if (!strcmp(final, "/"))
                 {
                     entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo = reservar_inodo('d', permisos);
-#if DEBUG7
+#if DEBUG
                     fprintf(stderr, "[buscar_entrada()→ entrada.nombre: %s, entrada.ninodo: %d]\n", entradas[nentrada].nombre, entradas[nentrada].ninodo);
                     fprintf(stderr, "[buscar_entrada()→ reservado inodo %d tipo d con permisos %d]\n", entradas[nentrada].ninodo, permisos);
 #endif
@@ -138,7 +143,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
             else // es un fichero
             {
                 entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo = reservar_inodo('f', permisos);
-#if DEBUG7
+#if DEBUG
                 fprintf(stderr, "[buscar_entrada()→ entrada.nombre: %s, entrada.ninodo: %d]\n", entradas[nentrada].nombre, entradas[nentrada].ninodo);
                 fprintf(stderr, "[buscar_entrada()→ reservado inodo %d tipo f con permisos %d]\n", entradas[nentrada].ninodo, permisos);
 #endif
