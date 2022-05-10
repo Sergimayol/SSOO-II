@@ -49,4 +49,153 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo)
 int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsigned int *p_inodo,
                    unsigned int *p_entrada, char reservar, unsigned char permisos)
 {
+    char inicial[70]; // preguntar
+    memset(inicial, 0, sizeof(inicial));
+    char final[1024];
+    memset(final, 0, sizeof(final));
+    char tipo[128];
+    memset(tipo, 0, sizeof(tipo));
+    struct inodo inodo_dir;
+    int numentradas;
+    int nentrada;
+    struct entrada entradas[BLOCKSIZE / tamEntrada];
+    if (!strcmp(camino_parcial, "/"))
+    {
+        *p_inodo = 0;
+        *p_entrada = 0;
+        return 0;
+    }
+    if (extraer_camino(camino_parcial, inicial, final, tipo) == -1)
+        return ERROR_EXTRAER_CAMINO;
+    if (leer_inodo(*p_inodo_dir, &inodo_dir) == -1)
+        return EXIT_FAILURE;
+
+    if ((inodo_dir.permisos & 4) != 4)
+    {
+        // fprintf(stderr, "[buscar_entrada()→ El inodo %d no tiene permisos de lectura]\n", *p_inodo_dir);
+        return ERROR_PERMISO_LECTURA;
+    }
+    numentradas = inodo_dir.tamEnBytesLog / tamEntrada;
+    nentrada = 0;
+    memset(entradas, 0, BLOCKSIZE);
+    if (numentradas > 0)
+    {
+        // leer el primer bloque de entradas y mirarlas desde el buffer hasta acabar de leer el buffer
+        if (mi_read_f(*p_inodo_dir, entradas, 0, BLOCKSIZE) == -1)
+            return -1;
+        while ((nentrada < numentradas) && strcmp(inicial, entradas[nentrada % (BLOCKSIZE / tamEntrada)].nombre))
+        {
+            nentrada++;
+            if ((nentrada % (BLOCKSIZE / tamEntrada)) == 0 && nentrada < numentradas) // múltiplo del número de entradas en un bloque
+            {
+                // leer el siguiente bloque de entradas
+                if (mi_read_f(*p_inodo_dir, entradas, nentrada * tamEntrada, BLOCKSIZE) == -1)
+                    return -1;
+            }
+        }
+    }
+    if (nentrada == numentradas)
+    {
+        switch (reservar)
+        {
+        case 0: // modo consulta. Como no existe retornamos error
+            return ERROR_NO_EXISTE_ENTRADA_CONSULTA;
+        case 1: // modo escritura
+            if (inodo_dir.tipo == 'f')
+            {
+                // fprintf(stderr, "[buscar_entrada()→ No se puede crear entrada en un fichero]\n");
+                return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
+            }
+            if ((inodo_dir.permisos & 2) != 2)
+            {
+                // fprintf(stderr, "[buscar_entrada()→ El inodo %d no tiene permisos de escritura]\n", *p_inodo_dir);
+                return ERROR_PERMISO_ESCRITURA;
+            }
+            strcpy(entradas[nentrada % (BLOCKSIZE / tamEntrada)].nombre, inicial);
+            if (!strcmp(tipo, "DIRECTORIO")) // es un directorio
+            {
+                if (!strcmp(final, "/"))
+                {
+                    entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo = reservar_inodo('d', permisos);
+                    // fprintf(stderr, "[buscar_entrada()→ entrada.nombre: %s, entrada.ninodo: %d]\n", entradas[nentrada].nombre, entradas[nentrada].ninodo);
+                    // fprintf(stderr, "[buscar_entrada()→ reservado inodo %d tipo d con permisos %d]\n", entradas[nentrada].ninodo, permisos);
+                }
+                else
+                {
+                    return ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO;
+                }
+            }
+            else // es un fichero
+            {
+                entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo = reservar_inodo('f', permisos);
+                // fprintf(stderr, "[buscar_entrada()→ entrada.nombre: %s, entrada.ninodo: %d]\n", entradas[nentrada].nombre, entradas[nentrada].ninodo);
+                // fprintf(stderr, "[buscar_entrada()→ reservado inodo %d tipo f con permisos %d]\n", entradas[nentrada].ninodo, permisos);
+            }
+            // if (mi_write_f(*p_inodo_dir, entradas, (nentrada / (BLOCKSIZE / tamEntrada)) * BLOCKSIZE, BLOCKSIZE) == -1)
+            if (mi_write_f(*p_inodo_dir, &entradas[nentrada % (BLOCKSIZE / tamEntrada)], nentrada * tamEntrada, tamEntrada) == -1)
+            {
+                if (entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo != -1)
+                {
+                    liberar_inodo(entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo);
+                }
+                return EXIT_FAILURE;
+            }
+        }
+    }
+    if (!strcmp(final, "") || !strcmp(final, "/"))
+    {
+        if ((nentrada < numentradas) && (reservar == 1))
+        {
+            return ERROR_ENTRADA_YA_EXISTENTE;
+        }
+        *p_inodo = entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo;
+        *p_entrada = nentrada;
+        return EXIT_SUCCESS;
+    }
+    else
+    {
+        *p_inodo_dir = entradas[nentrada % 16].ninodo;
+        return (buscar_entrada(final, p_inodo_dir, p_inodo, p_entrada, reservar, permisos));
+    }
+}
+
+/* -Función: mostrar_error_buscar_entrada.
+** -Descripción: Dado un resultado de error de la operaciónd de buscar_entrada,
+** se imprimer un texto de error determinado.
+** -Parámetros: número de error.
+** -Return:
+*/
+
+void mostrar_error_buscar_entrada(int error)
+{
+    switch (error)
+    {
+    case -1:
+        fprintf(stderr, "Error\n");
+        break;
+    case EXIT_FAILURE:
+        fprintf(stderr, "Error\n");
+        break;
+    case ERROR_EXTRAER_CAMINO:
+        fprintf(stderr, "Error: Camino incorrecto\n");
+        break;
+    case ERROR_PERMISO_LECTURA:
+        fprintf(stderr, "Error: Permiso denegado de lectura\n");
+        break;
+    case ERROR_NO_EXISTE_ENTRADA_CONSULTA:
+        fprintf(stderr, "Error: No existe la entrada\n");
+        break;
+    case ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO:
+        fprintf(stderr, "Error: No se puede crear una entrada en un fichero\n");
+        break;
+    case ERROR_PERMISO_ESCRITURA:
+        fprintf(stderr, "Error: Permiso denegado de escritura\n");
+        break;
+    case ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO:
+        fprintf(stderr, "Error: No existe directorio intermedio\n");
+        break;
+    case ERROR_ENTRADA_YA_EXISTENTE:
+        fprintf(stderr, "Error: La entrada ya existe\n");
+        break;
+    }
 }
