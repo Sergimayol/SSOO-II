@@ -72,7 +72,9 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
 
     if ((inodo_dir.permisos & 4) != 4)
     {
-        // fprintf(stderr, "[buscar_entrada()→ El inodo %d no tiene permisos de lectura]\n", *p_inodo_dir);
+#if DEBUG7
+        fprintf(stderr, "[buscar_entrada()→ El inodo %d no tiene permisos de lectura]\n", *p_inodo_dir);
+#endif
         return ERROR_PERMISO_LECTURA;
     }
     numentradas = inodo_dir.tamEnBytesLog / tamEntrada;
@@ -103,12 +105,16 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         case 1: // modo escritura
             if (inodo_dir.tipo == 'f')
             {
-                // fprintf(stderr, "[buscar_entrada()→ No se puede crear entrada en un fichero]\n");
+#if DEBUG7
+                fprintf(stderr, "[buscar_entrada()→ No se puede crear entrada en un fichero]\n");
+#endif
                 return ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO;
             }
             if ((inodo_dir.permisos & 2) != 2)
             {
-                // fprintf(stderr, "[buscar_entrada()→ El inodo %d no tiene permisos de escritura]\n", *p_inodo_dir);
+#if DEBUG7
+                fprintf(stderr, "[buscar_entrada()→ El inodo %d no tiene permisos de escritura]\n", *p_inodo_dir);
+#endif
                 return ERROR_PERMISO_ESCRITURA;
             }
             strcpy(entradas[nentrada % (BLOCKSIZE / tamEntrada)].nombre, inicial);
@@ -117,8 +123,10 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
                 if (!strcmp(final, "/"))
                 {
                     entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo = reservar_inodo('d', permisos);
-                    // fprintf(stderr, "[buscar_entrada()→ entrada.nombre: %s, entrada.ninodo: %d]\n", entradas[nentrada].nombre, entradas[nentrada].ninodo);
-                    // fprintf(stderr, "[buscar_entrada()→ reservado inodo %d tipo d con permisos %d]\n", entradas[nentrada].ninodo, permisos);
+#if DEBUG7
+                    fprintf(stderr, "[buscar_entrada()→ entrada.nombre: %s, entrada.ninodo: %d]\n", entradas[nentrada].nombre, entradas[nentrada].ninodo);
+                    fprintf(stderr, "[buscar_entrada()→ reservado inodo %d tipo d con permisos %d]\n", entradas[nentrada].ninodo, permisos);
+#endif
                 }
                 else
                 {
@@ -128,17 +136,18 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
             else // es un fichero
             {
                 entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo = reservar_inodo('f', permisos);
-                // fprintf(stderr, "[buscar_entrada()→ entrada.nombre: %s, entrada.ninodo: %d]\n", entradas[nentrada].nombre, entradas[nentrada].ninodo);
-                // fprintf(stderr, "[buscar_entrada()→ reservado inodo %d tipo f con permisos %d]\n", entradas[nentrada].ninodo, permisos);
+#if DEBUG7
+                fprintf(stderr, "[buscar_entrada()→ entrada.nombre: %s, entrada.ninodo: %d]\n", entradas[nentrada].nombre, entradas[nentrada].ninodo);
+                fprintf(stderr, "[buscar_entrada()→ reservado inodo %d tipo f con permisos %d]\n", entradas[nentrada].ninodo, permisos);
+#endif
             }
-            // if (mi_write_f(*p_inodo_dir, entradas, (nentrada / (BLOCKSIZE / tamEntrada)) * BLOCKSIZE, BLOCKSIZE) == -1)
             if (mi_write_f(*p_inodo_dir, &entradas[nentrada % (BLOCKSIZE / tamEntrada)], nentrada * tamEntrada, tamEntrada) == -1)
             {
                 if (entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo != -1)
                 {
                     liberar_inodo(entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo);
                 }
-                return EXIT_FAILURE;
+                return -1;
             }
         }
     }
@@ -150,7 +159,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         }
         *p_inodo = entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo;
         *p_entrada = nentrada;
-        return EXIT_SUCCESS;
+        return 0;
     }
     else
     {
@@ -165,7 +174,6 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
 ** -Parámetros: número de error.
 ** -Return:
 */
-
 void mostrar_error_buscar_entrada(int error)
 {
     switch (error)
