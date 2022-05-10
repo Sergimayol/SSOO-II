@@ -12,6 +12,8 @@ struct entrada
     unsigned int ninodo;
 };
 
+#define tamEntrada sizeof(struct entrada)
+
 #define ERROR_CAMINO_INCORRECTO -1
 #define ERROR_PERMISO_LECTURA -2
 #define ERROR_NO_EXISTE_ENTRADA_CONSULTA -3

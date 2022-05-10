@@ -7,7 +7,7 @@ Miembros:
 #include "directorios.h"
 #include <string.h>
 #include <stdio.h>
-
+#include "ficheros.h"
 #define DEBUG7 1 // Debugger del nivel 7
 
 //
@@ -68,7 +68,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         return 0;
     }
     if (extraer_camino(camino_parcial, inicial, final, tipo) == -1)
-        return ERROR_EXTRAER_CAMINO;
+        return ERROR_CAMINO_INCORRECTO;
     if (leer_inodo(*p_inodo_dir, &inodo_dir) == -1)
         return EXIT_FAILURE;
 
@@ -186,7 +186,7 @@ void mostrar_error_buscar_entrada(int error)
     case EXIT_FAILURE:
         fprintf(stderr, "Error\n");
         break;
-    case ERROR_EXTRAER_CAMINO:
+    case ERROR_CAMINO_INCORRECTO:
         fprintf(stderr, "Error: Camino incorrecto\n");
         break;
     case ERROR_PERMISO_LECTURA:
