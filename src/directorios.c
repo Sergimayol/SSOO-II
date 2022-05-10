@@ -180,33 +180,30 @@ void mostrar_error_buscar_entrada(int error)
 {
     switch (error)
     {
-    case -1:
-        fprintf(stderr, "Error\n");
-        break;
-    case EXIT_FAILURE:
-        fprintf(stderr, "Error\n");
-        break;
-    case ERROR_CAMINO_INCORRECTO:
-        fprintf(stderr, "Error: Camino incorrecto\n");
-        break;
-    case ERROR_PERMISO_LECTURA:
-        fprintf(stderr, "Error: Permiso denegado de lectura\n");
-        break;
-    case ERROR_NO_EXISTE_ENTRADA_CONSULTA:
-        fprintf(stderr, "Error: No existe la entrada\n");
-        break;
-    case ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO:
-        fprintf(stderr, "Error: No se puede crear una entrada en un fichero\n");
-        break;
-    case ERROR_PERMISO_ESCRITURA:
-        fprintf(stderr, "Error: Permiso denegado de escritura\n");
-        break;
-    case ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO:
-        fprintf(stderr, "Error: No existe directorio intermedio\n");
-        break;
-    case ERROR_ENTRADA_YA_EXISTENTE:
-        fprintf(stderr, "Error: La entrada ya existe\n");
-        break;
+        switch (error)
+        {
+        case -1:
+            fprintf(stderr, "Error: Camino incorrecto.\n");
+            break;
+        case -2:
+            fprintf(stderr, "Error: Permiso denegado de lectura.\n");
+            break;
+        case -3:
+            fprintf(stderr, "Error: No existe el archivo o el directorio.\n");
+            break;
+        case -4:
+            fprintf(stderr, "Error: No existe algún directorio intermedio.\n");
+            break;
+        case -5:
+            fprintf(stderr, "Error: Permiso denegado de escritura.\n");
+            break;
+        case -6:
+            fprintf(stderr, "Error: El archivo ya existe.\n");
+            break;
+        case -7:
+            fprintf(stderr, "Error: No es un directorio.\n");
+            break;
+        }
     }
 }
 
