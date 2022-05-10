@@ -6,6 +6,7 @@ Miembros:
 
 #include "directorios.h"
 #include <string.h>
+#include <stdio.h>
 
 #define DEBUG7 1 // Debugger del nivel 7
 
