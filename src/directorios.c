@@ -426,8 +426,6 @@ int mi_dir(const char *camino, char *buffer)
                     return -1;
             }
         }
-        if (!opcion)
-            strcat(buffer, "\n");
     }
     return numentradas;
 }
