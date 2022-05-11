@@ -6,6 +6,23 @@ Miembros:
 
 #include "ficheros.h"
 
+// Colores
+#define RESET_FORMATO "\033[0m"
+#define NEGRO_T "\x1b[30m"
+#define NEGRO_F "\x1b[40m"
+#define GRIS "\x1b[94m"
+#define ROJO "\x1b[31m"
+#define VERDE "\x1b[32m"
+#define AMARILLO "\x1b[33m"
+#define AZUL "\x1b[34m"
+#define MAGENTA "\x1b[35m"
+#define CYAN "\x1b[36m"
+#define BLANCO "\x1b[97m"
+#define NEGRITA "\x1b[1m"
+
+#define TAMFILA 100
+#define TAMBUFFER (TAMFILA * 1000) // suponemos un máx de 1000 entradas, aunque debería ser SB.totInodos
+
 #define TAMNOMBRE 60 // tamaño del nombre de directorio o fichero, en Ext2 = 256
 
 struct entrada
