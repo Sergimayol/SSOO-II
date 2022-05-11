@@ -6,13 +6,13 @@ int main(int argc, char **argv)
     { // Check sintaxis
         fprintf(stderr, "Command syntax should be: mi_mkdir <disco> <permisos> </ruta> \n");
         return -1;
-        int pathL = strlen(argv[3]);
 
-        if (argv[3][pathL - 1] == '/')
-        { // no es un fichero
+        int dir = strlen(argv[3]);
 
+        if (argv[3][dir - 1] == '/')
+        {
             if ((atoi(argv[2]) < 0) || (atoi(argv[2]) > 7))
-            { // Check value of permisos
+            { // Check permisos del 0 al 7
                 fprintf(stderr, "Permisos no validos\n");
                 return -1;
             }
