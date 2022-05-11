@@ -364,51 +364,49 @@ int mi_dir(const char *camino, char *buffer)
         {
             if (leer_inodo(entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo, &inodo) == -1)
                 return -1;
-            if (opcion)
+            // tipo de inodo
+            if (inodo.tipo == 'f')
             {
-                // tipo de inodo
-                if (inodo.tipo == 'f')
-                {
-                    strcat(buffer, "f\t");
-                }
-                else
-                {
-                    strcat(buffer, "d\t");
-                }
-                // permisos del inodo
-                if (inodo.permisos & 4) // lectura
-                {
-                    strcat(buffer, "r");
-                }
-                else
-                {
-                    strcat(buffer, "-");
-                }
-                if (inodo.permisos & 2) // escritura
-                {
-                    strcat(buffer, "w");
-                }
-                else
-                {
-                    strcat(buffer, "-");
-                }
-                if (inodo.permisos & 1) // ejecución
-                {
-                    strcat(buffer, "x\t");
-                }
-                else
-                {
-                    strcat(buffer, "-\t");
-                }
-                // mtime del inodo
-                tm = localtime(&inodo.mtime);
-                sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d\t", tm->tm_year + 1900,
-                        tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
-                strcat(buffer, tmp);
-                // tamaño del inodo
-                sprintf(tam, "%d\t", inodo.tamEnBytesLog);
-                strcat(buffer, tam);
+                strcat(buffer, "f\t");
             }
+            else
+            {
+                strcat(buffer, "d\t");
+            }
+            // permisos del inodo
+            if (inodo.permisos & 4) // lectura
+            {
+                strcat(buffer, "r");
+            }
+            else
+            {
+                strcat(buffer, "-");
+            }
+            if (inodo.permisos & 2) // escritura
+            {
+                strcat(buffer, "w");
+            }
+            else
+            {
+                strcat(buffer, "-");
+            }
+            if (inodo.permisos & 1) // ejecución
+            {
+                strcat(buffer, "x\t");
+            }
+            else
+            {
+                strcat(buffer, "-\t");
+            }
+            // mtime del inodo
+            tm = localtime(&inodo.mtime);
+            sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d\t", tm->tm_year + 1900,
+                    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+            strcat(buffer, tmp);
+            // tamaño del inodo
+            sprintf(tam, "%d\t", inodo.tamEnBytesLog);
+            strcat(buffer, tam);
+
             // nombre de la entrada
             if (inodo.tipo == 'f')
             {
