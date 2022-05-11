@@ -293,10 +293,13 @@ int mi_stat(const char *camino, struct STAT *stat)
 int mi_dir(const char *camino, char *buffer)
 {
     struct inodo inodo;
-    struct tm *tm; // ver info: struct tm
-    char tmp[100];
     unsigned int p_inodo_dir, p_inodo, p_entrada;
-    int error, numentradas, nentrada;
+    int error;
+    int numentradas;
+    int nentrada;
+    struct entrada entradas[BLOCKSIZE / tamEntrada];
+    struct tm *tm;
+    char tmp[100], tam[100], nom[100];
     p_inodo_dir = 0;
 
     if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0)) != EXIT_SUCCESS)
@@ -340,5 +343,103 @@ int mi_dir(const char *camino, char *buffer)
         tm = localtime(&inodo.mtime);
         sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
         strcat(buffer, tmp);
+        sprintf(tam, "%d\t", inodo.tamEnBytesLog);
+        if (mi_read_f(p_inodo_dir, entradas, p_entrada * tamEntrada, tamEntrada) == -1)
+            return -1;
+        sprintf(nom, "%s\n", entradas[0].nombre);
+        strcat(buffer, nom);
+        return 1;
     }
+    if ((inodo.permisos & 2) != 2) // comprueba el permiso de lectura
+        return -1;
+
+    numentradas = inodo.tamEnBytesLog / tamEntrada;
+    nentrada = 0;
+    if (numentradas > 0)
+    {
+        // lee el primer bloque de entradas
+        if (mi_read_f(p_inodo, entradas, 0, BLOCKSIZE) == -1)
+            return -1;
+        while (nentrada < numentradas)
+        {
+            if (leer_inodo(entradas[nentrada % (BLOCKSIZE / tamEntrada)].ninodo, &inodo) == -1)
+                return -1;
+            if (opcion)
+            {
+                // tipo de inodo
+                if (inodo.tipo == 'f')
+                {
+                    strcat(buffer, "f\t");
+                }
+                else
+                {
+                    strcat(buffer, "d\t");
+                }
+                // permisos del inodo
+                if (inodo.permisos & 4) // lectura
+                {
+                    strcat(buffer, "r");
+                }
+                else
+                {
+                    strcat(buffer, "-");
+                }
+                if (inodo.permisos & 2) // escritura
+                {
+                    strcat(buffer, "w");
+                }
+                else
+                {
+                    strcat(buffer, "-");
+                }
+                if (inodo.permisos & 1) // ejecución
+                {
+                    strcat(buffer, "x\t");
+                }
+                else
+                {
+                    strcat(buffer, "-\t");
+                }
+                // mtime del inodo
+                tm = localtime(&inodo.mtime);
+                sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d\t", tm->tm_year + 1900,
+                        tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+                strcat(buffer, tmp);
+                // tamaño del inodo
+                sprintf(tam, "%d\t", inodo.tamEnBytesLog);
+                strcat(buffer, tam);
+            }
+            // nombre de la entrada
+            if (inodo.tipo == 'f')
+            {
+                sprintf(nom, "%s", entradas[nentrada % (BLOCKSIZE / tamEntrada)].nombre);
+            }
+            else
+            {
+                sprintf(nom, "%s", entradas[nentrada % (BLOCKSIZE / tamEntrada)].nombre);
+            }
+            strcat(buffer, nom);
+            switch (opcion)
+            {
+            case 0:
+                strcat(buffer, "\t");
+                break;
+
+            case 1:
+                strcat(buffer, "\n");
+                break;
+            }
+            nentrada++;
+            if (((nentrada) % (BLOCKSIZE / tamEntrada)) == 0)
+            {
+                // leer el siguiente bloque de entradas
+                // fprintf(stderr, "ESTOY EN LA ENTRADA %d Y VOY A LEER EL SIGUIENTE BLOQUE DE ENTRADAS\n", nentrada);
+                if (mi_read_f(p_inodo, entradas, nentrada * tamEntrada, BLOCKSIZE) == -1)
+                    return -1;
+            }
+        }
+        if (!opcion)
+            strcat(buffer, "\n");
+    }
+    return numentradas;
 }
