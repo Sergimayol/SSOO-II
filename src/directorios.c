@@ -417,16 +417,6 @@ int mi_dir(const char *camino, char *buffer)
                 sprintf(nom, "%s", entradas[nentrada % (BLOCKSIZE / tamEntrada)].nombre);
             }
             strcat(buffer, nom);
-            switch (opcion)
-            {
-            case 0:
-                strcat(buffer, "\t");
-                break;
-
-            case 1:
-                strcat(buffer, "\n");
-                break;
-            }
             nentrada++;
             if (((nentrada) % (BLOCKSIZE / tamEntrada)) == 0)
             {
