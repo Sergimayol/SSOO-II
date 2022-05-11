@@ -244,13 +244,13 @@ void mostrar_error_buscar_entrada(int error)
 
 /* --------- Nivel 8 --------- */
 
-//
+// Listo
 int mi_creat(const char *camino, unsigned char permisos)
 {
-    int error;
     unsigned int p_inodo_dir, p_inodo, p_entrada;
     p_inodo_dir = 0;
-    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos)) != EXIT_SUCCESS)
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
+    if (error < 0)
     {
         mostrar_error_buscar_entrada(error);
         return -1;
@@ -262,16 +262,22 @@ int mi_chmod(const char *camino, unsigned char permisos)
 {
     struct inodo inodo;
     unsigned int p_inodo_dir, p_inodo, p_entrada;
-    int error;
     p_inodo_dir = 0;
-    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0)) != EXIT_SUCCESS)
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, permisos);
+    if (error < 0)
     {
         mostrar_error_buscar_entrada(error);
         return -1;
     }
     if (leer_inodo(p_inodo, &inodo) == -1)
+    {
         return -1;
-    return mi_chmod_f(p_inodo, permisos);
+    }
+    else
+    {
+        return mi_chmod_f(p_inodo, permisos);
+    }
+    return 0;
 }
 
 int mi_stat(const char *camino, struct STAT *stat)
@@ -280,14 +286,21 @@ int mi_stat(const char *camino, struct STAT *stat)
     unsigned int p_inodo_dir, p_inodo, p_entrada;
     int error;
     p_inodo_dir = 0;
-    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0)) != EXIT_SUCCESS)
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
+    if (error < 0)
     {
         mostrar_error_buscar_entrada(error);
         return -1;
     }
     if (leer_inodo(p_inodo, &inodo) == -1)
+    {
         return -1;
-    return mi_stat_f(p_inodo, stat);
+    }
+    else
+    {
+        return mi_stat_f(p_inodo, stat);
+    }
+    return 0;
 }
 
 int mi_dir(const char *camino, char *buffer)
