@@ -289,3 +289,56 @@ int mi_stat(const char *camino, struct STAT *stat)
         return -1;
     return mi_stat_f(p_inodo, stat);
 }
+
+int mi_dir(const char *camino, char *buffer)
+{
+    struct inodo inodo;
+    struct tm *tm; // ver info: struct tm
+    char tmp[100];
+    unsigned int p_inodo_dir, p_inodo, p_entrada;
+    int error, numentradas, nentrada;
+    p_inodo_dir = 0;
+
+    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0)) != EXIT_SUCCESS)
+    {
+        mostrar_error_buscar_entrada(error);
+        return -1;
+    }
+    if (leer_inodo(p_inodo, &inodo) == -1)
+    {
+        return -1;
+    }
+    if (inodo.tipo == 'f') // comprueba si es un fichero
+    {
+        strcat(buffer, "f\t");
+        // permisos del inodo
+
+        if (inodo.permisos & 4)
+        {
+            strcat(buffer, "r");
+        }
+        else
+        {
+            strcat(buffer, "-");
+        }
+        if (inodo.permisos & 2)
+        {
+            strcat(buffer, "w");
+        }
+        else
+        {
+            strcat(buffer, "-");
+        }
+        if (inodo.permisos & 1)
+        {
+            strcat(buffer, "x");
+        }
+        else
+        {
+            strcat(buffer, "-");
+        }
+        tm = localtime(&inodo.mtime);
+        sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+        strcat(buffer, tmp);
+    }
+}
