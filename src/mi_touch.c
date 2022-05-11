@@ -11,19 +11,17 @@ int main(int argc, char **argv)
     // Comprobación sintaxis
     if (argc != 4)
     {
-        fprintf(stderr, "Error de sintaxis: ./mi_mkdir <disco> <permisos> </ruta>\n");
+        fprintf(stderr, "Error de sintaxis: ./mi_touch <disco> <permisos> </ruta>\n");
         return -1;
     }
-
     // Comprobación permisos
     if ((atoi(argv[2]) < 0) || (atoi(argv[2]) > 7))
     {
         fprintf(stderr, "Error de permisos: permisos [%d] no válidos.\n", atoi(argv[2]));
         return -1;
     }
-
     // Comprobar de si se trata de un fichero o un directorio
-    if (argv[3][strlen(argv[3]) - 1] == '/') // si no es un fichero
+    if (argv[3][strlen(argv[3]) - 1] != '/')
     {
         // Montar disco
         if (bmount(argv[1]) == -1)
