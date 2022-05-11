@@ -38,6 +38,7 @@ int main(int argc, char **argv)
         }
         if (bumount() == -1)
         {
+            fprintf(stderr, "Error desmontando disco.\n");
             return -1;
         }
     }
