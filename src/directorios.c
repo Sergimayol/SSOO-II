@@ -321,7 +321,7 @@ int mi_stat(const char *camino, struct STAT *stat)
 int mi_dir(const char *camino, char *buffer, char tipo)
 {
     struct tm *tm; // ver info: struct tm
-    struct superbloque_t SB;
+    struct superbloque SB;
     struct inodo inodo;
     unsigned int p_inodo_dir, p_inodo, p_entrada;
     p_inodo_dir = SB.posInodoRaiz;
