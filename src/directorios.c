@@ -318,7 +318,7 @@ int mi_stat(const char *camino, struct STAT *stat)
 }
 
 // Falta
-int mi_dir(const char *camino, char *buffer, char tipo)
+int mi_dir(const char *camino, char *buffer, char *tipo)
 {
     struct tm *tm; // ver info: struct tm
     struct superbloque SB;
