@@ -17,17 +17,23 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error de sintaxis: ./mi_chmod <disco> <permisos> </ruta>\n");
         return -1;
     }
+    // Comprobar permisos
+    if (atoi(argv[2]) > 7)
+    {
+        fprintf(stderr, "Error permisos incorrectos\n");
+        return -1;
+    }
     // Montar disco
     if (bmount(argv[1]) == -1)
     {
         fprintf(stderr, "Error montando disco.\n");
         return -1;
     }
-    struct STAT p_stat;
-    if (mi_stat(argv[2], &p_stat) < 0)
+    if (mi_chmod(argv[3], permisos) == -1)
     {
         return -1;
     }
+
     if (bumount() == -1)
     {
         fprintf(stderr, "Error desmontando disco.\n");
