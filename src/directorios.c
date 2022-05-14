@@ -438,3 +438,9 @@ int mi_dir(const char *camino, char *buffer, char *tipo)
     }
     return 0;
 }
+
+//
+int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes) {}
+
+//
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes) {}
