@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     }
     char buffer[TAMBUFFER];
     memset(buffer, 0, TAMBUFFER);
-    int total = mi_dir(argv[2], buffer);
+    int total = mi_dir(argv[2], buffer, '\0');
     if (total < 0)
     {
         return -1;

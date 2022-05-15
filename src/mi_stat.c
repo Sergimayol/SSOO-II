@@ -21,7 +21,8 @@ int main(int argc, char **argv)
     }
 
     struct STAT p_stat;
-    if (mi_stat(argv[2], &p_stat) == -1)
+    int p_inodo = mi_stat(argv[2], &p_stat);
+    if (p_inodo == -1)
     {
         return -1;
     }

@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 {
     if (argc != 4)
     {
-        fprintf(stderr, "Error de sintaxis: ./mi_chmod <disco> <permisos> </ruta>\n");
+        fprintf(stderr, "Error de sintaxis: ./mi_chmod <nombre_dispositivo> <permisos> </ruta>\n");
         return -1;
     }
     // Comprobar permisos
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error montando disco.\n");
         return -1;
     }
-    if (mi_chmod(argv[3], permisos) == -1)
+    if (mi_chmod(argv[3], atoi(argv[2])) == -1)
     {
         return -1;
     }
