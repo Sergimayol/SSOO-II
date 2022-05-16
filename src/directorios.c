@@ -221,9 +221,9 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
             return ERROR_ENTRADA_YA_EXISTENTE;
         }
         // asignar a *p_inodo el numero de inodo del directorio o fichero creado o leido
-        *(p_inodo) = num_entrada_inodo;
+        *(p_inodo) = buffer_lectura[num_entrada_inodo].ninodo;
         // asignar a *p_entrada el número de su entrada dentro del último directorio que lo contiene
-        *(p_entrada) = entrada.ninodo;
+        *(p_entrada) = num_entrada_inodo;
         // cortamos la recursividad
         return 0;
     }
