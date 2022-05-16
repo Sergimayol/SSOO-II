@@ -28,9 +28,7 @@ int main(int argc, char **argv)
     }
 
     struct tm *ts;
-    char atime[80];
-    char mtime[80];
-    char ctime[80];
+    char atime[80], mtime[80], ctime[80];
 
     ts = localtime(&p_stat.atime);
     strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);

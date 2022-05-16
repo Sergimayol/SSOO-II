@@ -18,9 +18,9 @@ int main(int argc, char **argv)
         return -1;
     }
     // Comprobar permisos
-    if (atoi(argv[2]) > 7)
+    if ((atoi(argv[2]) < 0) || (atoi(argv[2]) > 7))
     {
-        fprintf(stderr, "Error permisos incorrectos\n");
+        fprintf(stderr, "Permisos no validos\n");
         return -1;
     }
     // Montar disco
@@ -29,15 +29,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error montando disco.\n");
         return -1;
     }
-    if (mi_chmod(argv[3], atoi(argv[2])) == -1)
-    {
-        return -1;
-    }
-
-    if (bumount() == -1)
-    {
-        fprintf(stderr, "Error desmontando disco.\n");
-        return -1;
-    }
+    mi_chmod(argv[3], atoi(argv[2]));
+    bumount();
     return 0;
 }
