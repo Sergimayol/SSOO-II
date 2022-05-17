@@ -12,9 +12,11 @@ Miembros:
 #define NEGRO_F "\x1b[40m"
 #define GRIS "\x1b[94m"
 #define ROJO "\x1b[31m"
+#define ROJO_F "\x1b[91m"
 #define VERDE "\x1b[32m"
 #define AMARILLO "\x1b[33m"
 #define AZUL "\x1b[34m"
+#define AZUL_F "\x1b[94m"
 #define MAGENTA "\x1b[35m"
 #define CYAN "\x1b[36m"
 #define BLANCO "\x1b[97m"
@@ -48,3 +50,5 @@ int mi_dir(const char *camino, char *buffer, char *tipo);
 int mi_stat(const char *camino, struct STAT *stat);
 int mi_chmod(const char *camino, unsigned char permisos);
 int mi_creat(const char *camino, unsigned char permisos);
+int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes);
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes);

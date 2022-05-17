@@ -21,15 +21,14 @@ int main(int argc, char **argv)
     }
 
     struct STAT p_stat;
-    if (mi_stat(argv[2], &p_stat) == -1)
+    int p_inodo = mi_stat(argv[2], &p_stat);
+    if (p_inodo == -1)
     {
         return -1;
     }
 
     struct tm *ts;
-    char atime[80];
-    char mtime[80];
-    char ctime[80];
+    char atime[80], mtime[80], ctime[80];
 
     ts = localtime(&p_stat.atime);
     strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
