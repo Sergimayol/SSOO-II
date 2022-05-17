@@ -5,42 +5,46 @@ Miembros:
 */
 
 #include "directorios.h"
-// Solo está escribiendo la primera palabra (REVISAR)
+
+#define DEBUGMI_ESCRIBIR 1
+
 int main(int argc, char **argv)
 {
-    if (argv[1] == NULL || argv[2] == NULL || argv[3] == NULL || argv[4] == NULL)
+    if (argc != 5)
     {
         fprintf(stderr, "Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>\n");
         return -1;
     }
 
-    int pathL = strlen(argv[2]); // Ruta del fichero
-
-    if (argv[2][pathL - 1] != '/')
-    { // Es un fichero
-
-        if (bmount(argv[1]) == -1)
-        {
-            fprintf(stderr, "Error while mounting\n");
-            return -1;
-        }
-        char *camino = argv[2];
-        char *buffer_texto = argv[3];
-        unsigned int offset = atoi(argv[4]);
-        // Cantidad de bytes escritos
-        int nbytes = mi_write(camino, buffer_texto, offset, strlen(buffer_texto));
-
-        if (nbytes == -1)
-        {
-            nbytes = 0;
-        }
-        bumount();
-        fprintf(stderr, "Se han escrito %d bytes\n", nbytes);
-        return 0;
-    }
-    else // No es un fichero
+    // Comprobar si se trata de un fichero
+    if (argv[2][strlen(argv[2]) - 1] == '/')
     {
         fprintf(stderr, "No es un fichero\n");
         return -1;
     }
+
+    if (bmount(argv[1]) == -1)
+    {
+        fprintf(stderr, "Error montando disco.\n");
+        return -1;
+    }
+
+#if DEBUGMI_ESCRIBIR
+    fprintf(stderr, "Longitud texto: %ld\n", strlen(argv[3]));
+#endif
+
+    // Cantidad de bytes escritos
+    int nbytes = mi_write(argv[2], argv[3], atoi(argv[4]), strlen(argv[3]));
+    if (nbytes == -1)
+    {
+        nbytes = 0;
+    }
+#if DEBUGMI_ESCRIBIR
+    fprintf(stderr, "Bytes escritos: %d\n", nbytes);
+#endif
+    if (bumount() == -1)
+    {
+        return -1;
+    }
+    return 0;
 }

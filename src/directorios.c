@@ -6,8 +6,12 @@ Miembros:
 
 #include "directorios.h"
 
-#define DEBUG 1 // Debugger del nivel 7
-static struct UltimaEntrada UltimaEntradaEscritura;
+#define DEBUG 1  // Debugger del nivel 7
+#define DEBUG8 1 // Debugger del nivel 8
+#define DEBUG9 1 // Debugger del nivel 9
+
+static struct UltimaEntrada UltimaEntradaEscritura[CACHE];
+int MAXCACHE = CACHE;
 
 /* --------- Nivel 7 --------- */
 
@@ -326,6 +330,7 @@ int mi_stat(const char *camino, struct STAT *stat)
     return 0;
 }
 
+//
 int mi_dir(const char *camino, char *buffer, char *tipo)
 {
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
@@ -425,52 +430,127 @@ int mi_dir(const char *camino, char *buffer, char *tipo)
     return nEntradas;
 }
 
-//
+/* --------- Nivel 9 --------- */
+
+// Función de directorios.c para escribir contenido en un fichero.
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes)
 {
     unsigned int p_inodo = 0, p_inodo_dir = 0, p_entrada = 0;
-    if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
+    unsigned int enc = 0;
+
+    // comprobar si ya se ha leido anteriormente
+    for (int i = 0; i < (MAXCACHE - 1); i++)
     {
-        p_inodo = UltimaEntradaEscritura.p_inodo;
+        if (strcmp(camino, UltimaEntradaEscritura[i].camino) == 0)
+        {
+            p_inodo = UltimaEntradaEscritura[i].p_inodo;
+            enc = 1;
+#if DEBUG9
+            fprintf(stderr, "[mi_write() → Utilizamos la caché de escritura]\n");
+#endif
+            break;
+        }
     }
-    else
+    // En el caso de que no este en cache
+    if (!enc)
     {
-        // Permisos = 2 para escritura
-        int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 2);
-        // Si el valor es menor que 0
+        int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
         if (error < 0)
         {
-            // Imprimir error
             mostrar_error_buscar_entrada(error);
             return -1;
         }
-        strcpy(UltimaEntradaEscritura.camino, camino);
-        UltimaEntradaEscritura.p_inodo = p_inodo;
+        // si aun no se ha llenado la caché
+        if (MAXCACHE > 0)
+        {
+            strcpy(UltimaEntradaEscritura[CACHE - MAXCACHE].camino, camino);
+            UltimaEntradaEscritura[CACHE - MAXCACHE].p_inodo = p_inodo;
+            MAXCACHE--;
+#if DEBUG9
+            fprintf(stderr, "[mi_write() → Actualizamos la caché de escritura]\n");
+#endif
+        }
+        else // Remplazo FIFO
+        {
+            for (int i = 0; i < CACHE - 1; i++)
+            {
+                strcpy(UltimaEntradaEscritura[i].camino, UltimaEntradaEscritura[i + 1].camino);
+                UltimaEntradaEscritura[i].p_inodo = UltimaEntradaEscritura[i + 1].p_inodo;
+            }
+            strcpy(UltimaEntradaEscritura[CACHE - 1].camino, camino);
+            UltimaEntradaEscritura[CACHE - 1].p_inodo = p_inodo;
+
+#if DEBUG9
+            fprintf(stderr, "[mi_write() → Actualizamos la caché de escritura]\n");
+#endif
+        }
     }
-    return mi_write_f(p_inodo, buf, offset, nbytes);
+    // Escribimos en el archivo
+    int bytes_escritos = mi_write_f(p_inodo, buf, offset, nbytes);
+    if (bytes_escritos == -1)
+    {
+        bytes_escritos = 0;
+    }
+    return bytes_escritos;
 }
 
-//
+// Función de directorios.c para leer los nbytes del fichero indicado por camino,
+// a partir del offset pasado por parámetro y copiarlos en el buffer buf.
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes)
 {
     unsigned int p_inodo = 0, p_inodo_dir = 0, p_entrada = 0;
-    if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
+    unsigned int enc = 0;
+    for (int i = 0; i < (MAXCACHE - 1); i++)
     {
-        p_inodo = UltimaEntradaEscritura.p_inodo;
+        if (strcmp(camino, UltimaEntradaEscritura[i].camino) == 0)
+        {
+            p_inodo = UltimaEntradaEscritura[i].p_inodo;
+            enc = 1;
+#if DEBUG9
+            fprintf(stderr, "[mi_read() → Utilizamos la caché de lectura]\n");
+#endif
+            break;
+        }
     }
-    else
+    if (!enc)
     {
-        // Permisos = 4 para lectura
         int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
-        // Si el valor es menor que 0
         if (error < 0)
         {
-            // Imprimir error
             mostrar_error_buscar_entrada(error);
             return -1;
         }
-        strcpy(UltimaEntradaEscritura.camino, camino);
-        UltimaEntradaEscritura.p_inodo = p_inodo;
+        // si aun no se ha llenado la caché
+        if (MAXCACHE > 0)
+        {
+            strcpy(UltimaEntradaEscritura[CACHE - MAXCACHE].camino, camino);
+            UltimaEntradaEscritura[CACHE - MAXCACHE].p_inodo = p_inodo;
+            MAXCACHE--;
+#if DEBUG9
+            fprintf(stderr, "[mi_read() → Actualizamos la caché de lectura]\n");
+#endif
+        }
+        else
+        {
+            for (int i = 0; i < CACHE - 1; i++)
+            {
+                strcpy(UltimaEntradaEscritura[i].camino, UltimaEntradaEscritura[i + 1].camino);
+                UltimaEntradaEscritura[i].p_inodo = UltimaEntradaEscritura[i + 1].p_inodo;
+            }
+            strcpy(UltimaEntradaEscritura[CACHE - 1].camino, camino);
+            UltimaEntradaEscritura[CACHE - 1].p_inodo = p_inodo;
+
+#if DEBUG9
+            fprintf(stderr, "[mi_read() → Actualizamos la caché de lectura]\n");
+#endif
+        }
     }
-    return mi_read_f(p_inodo, buf, offset, nbytes);
+    // Realiza la lectura del archivo.
+    int bytes_leidos = mi_read_f(p_inodo, buf, offset, nbytes);
+    if (bytes_leidos == -1)
+    {
+        mostrar_error_buscar_entrada(ERROR_PERMISO_LECTURA);
+        return -1;
+    }
+    return bytes_leidos;
 }

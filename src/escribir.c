@@ -4,12 +4,14 @@ Miembros:
  - Alejandro Rodríguez Arguimbau
 */
 
-#include "ficheros.h"
+#include "directorios.h"
+
+#define DEBUGPRINT 1
 
 int main(int argc, char **argv)
 {
 	// Consulta sintaxis correcta
-	if (argv[1] == NULL || argv[2] == NULL || argv[3] == NULL)
+	if (argc != 4)
 	{
 		fprintf(stderr, "Sintaxis: escribir <nombre_dispositivo> <\"$(cat fichero)\"> <diferentes_diferentes_inodos>\nOffsets: 9000, 209000, 30725000, 409605000, 480000000\n Si diferentes_inodos=0 se reserva un solo inodo para todos los offsets\n");
 		return -1;
@@ -41,6 +43,13 @@ int main(int argc, char **argv)
 			return -1;
 		}
 		printf("Bytes escritos: %d\n", bytesescritos);
+
+#if DEBUGPRINT
+		int longitud = strlen(argv[2]);
+		char *buffer_texto = malloc(longitud);
+		memset(buffer_texto, 0, longitud);
+		printf("Bytes leídos: %d\n", mi_read_f(ninodo, buffer_texto, offsets[i], longitud));
+#endif
 
 		// Información inodo escrito
 		struct STAT p_stat;
