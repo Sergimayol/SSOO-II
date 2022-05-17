@@ -14,7 +14,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    int pathL = strlen(argsv[2]);
+    int pathL = strlen(argv[2]);
 
     if (argv[2][pathL - 1] != '/')
     { // Es un fichero
