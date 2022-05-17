@@ -8,7 +8,7 @@ Miembros:
 
 int main(int argc, char **argv)
 {
-    if (argc != 5)
+    if (argv[1] == NULL || argv[2] == NULL || argv[3] == NULL || argv[4] == NULL)
     {
         fprintf(stderr, "Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>\n");
         return -1;
