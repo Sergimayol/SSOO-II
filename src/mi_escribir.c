@@ -5,7 +5,7 @@ Miembros:
 */
 
 #include "directorios.h"
-
+// Solo está escribiendo la primera palabra (REVISAR)
 int main(int argc, char **argv)
 {
     if (argv[1] == NULL || argv[2] == NULL || argv[3] == NULL || argv[4] == NULL)
