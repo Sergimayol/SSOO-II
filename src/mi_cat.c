@@ -16,9 +16,9 @@ int main(int argc, char **argv)
 
     int pathL = strlen(argsv[2]);
 
-    if (argsv[2][pathL - 1] != '/')
+    if (argv[2][pathL - 1] != '/')
     { // Es un fichero
-        if (bmount(argsv[1]) == -1)
+        if (bmount(argv[1]) == -1)
         {
             fprintf(stderr, "Error while mounting\n");
             return -1;
