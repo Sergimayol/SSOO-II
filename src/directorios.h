@@ -25,12 +25,19 @@ Miembros:
 #define TAMFILA 100
 #define TAMBUFFER (TAMFILA * 1000) // suponemos un máx de 1000 entradas, aunque debería ser SB.totInodos
 
-#define TAMNOMBRE 60 // tamaño del nombre de directorio o fichero, en Ext2 = 256
+#define PROFUNDIDAD 32 // profundidad máxima del árbol de directorios
+#define TAMNOMBRE 60   // tamaño del nombre de directorio o fichero, en Ext2 = 256
 
 struct entrada
 {
     char nombre[TAMNOMBRE];
     unsigned int ninodo;
+};
+
+struct UltimaEntrada
+{
+    char camino[TAMNOMBRE * PROFUNDIDAD];
+    int p_inodo;
 };
 
 #define tamEntrada sizeof(struct entrada)

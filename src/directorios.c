@@ -7,6 +7,7 @@ Miembros:
 #include "directorios.h"
 
 #define DEBUG 1 // Debugger del nivel 7
+static struct UltimaEntrada UltimaEntradaEscritura;
 
 /* --------- Nivel 7 --------- */
 
@@ -325,7 +326,6 @@ int mi_stat(const char *camino, struct STAT *stat)
     return 0;
 }
 
-// Falta
 int mi_dir(const char *camino, char *buffer, char *tipo)
 {
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
@@ -428,11 +428,49 @@ int mi_dir(const char *camino, char *buffer, char *tipo)
 //
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes)
 {
-    return 0;
+    unsigned int p_inodo = 0, p_inodo_dir = 0, p_entrada = 0;
+    if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
+    {
+        p_inodo = UltimaEntradaEscritura.p_inodo;
+    }
+    else
+    {
+        // Permisos = 2 para escritura
+        int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 2);
+        // Si el valor es menor que 0
+        if (error < 0)
+        {
+            // Imprimir error
+            mostrar_error_buscar_entrada(error);
+            return -1;
+        }
+        strcpy(UltimaEntradaEscritura.camino, camino);
+        UltimaEntradaEscritura.p_inodo = p_inodo;
+    }
+    return mi_write_f(p_inodo, buf, offset, nbytes);
 }
 
 //
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes)
 {
-    return 0;
+    unsigned int p_inodo = 0, p_inodo_dir = 0, p_entrada = 0;
+    if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
+    {
+        p_inodo = UltimaEntradaEscritura.p_inodo;
+    }
+    else
+    {
+        // Permisos = 4 para lectura
+        int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+        // Si el valor es menor que 0
+        if (error < 0)
+        {
+            // Imprimir error
+            mostrar_error_buscar_entrada(error);
+            return -1;
+        }
+        strcpy(UltimaEntradaEscritura.camino, camino);
+        UltimaEntradaEscritura.p_inodo = p_inodo;
+    }
+    return mi_read_f(p_inodo, buf, offset, nbytes);
 }
