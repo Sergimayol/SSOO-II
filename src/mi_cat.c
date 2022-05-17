@@ -25,7 +25,7 @@ int main(int argc, char **argv)
         }
 
         unsigned int offset = 0, bytes_leidos = 0, total_bytes_leidos = 0;
-        char *camino = argsv[2];
+        char *camino = argv[2];
         int tambuffer = BLOCKSIZE * 4; // o 1500
         char read[tambuffer];
 
