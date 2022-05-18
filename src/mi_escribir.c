@@ -10,7 +10,7 @@ Miembros:
 
 int main(int argc, char **argv)
 {
-    if (argc < 6)
+    if (argc <= 5)
     {
         fprintf(stderr, "Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>\n");
         return -1;
@@ -39,12 +39,14 @@ int main(int argc, char **argv)
     {
         nbytes = 0;
     }
-#if DEBUGMI_ESCRIBIR
-    fprintf(stderr, "Bytes escritos: %d\n", nbytes);
-#endif
     if (bumount() == -1)
     {
         return -1;
     }
+    return 0;
+
+#if DEBUGMI_ESCRIBIR
+    fprintf(stderr, "Bytes escritos: %d\n", nbytes);
+#endif
     return 0;
 }
