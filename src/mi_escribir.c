@@ -10,7 +10,7 @@ Miembros:
 
 int main(int argc, char **argv)
 {
-    if (argc != 5)
+    if (argc < 6)
     {
         fprintf(stderr, "Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>\n");
         return -1;
