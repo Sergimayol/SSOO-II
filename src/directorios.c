@@ -10,6 +10,7 @@ Miembros:
 #define DEBUG8 1 // Debugger del nivel 8
 #define DEBUG9 1 // Debugger del nivel 9
 
+struct superbloque SB;
 static struct UltimaEntrada UltimaEntradaEscritura[CACHE];
 int MAXCACHE = CACHE;
 
@@ -313,21 +314,22 @@ int mi_chmod(const char *camino, unsigned char permisos)
 // Funcion para obtiener la metainformacion del elemento del camino.
 int mi_stat(const char *camino, struct STAT *stat)
 {
-    unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
-    // Obtenemos el valor de buscar_entrada
-    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 0);
-    // Si el valor es menor que 0
-    if (error < 0)
+    bread(posSB, &SB);
+    unsigned int p_inodo_dir, p_inodo;
+    p_inodo_dir = p_inodo = SB.posInodoRaiz;
+    unsigned int p_entrada = 0;
+    int error;
+    // leemos el inodo, así que permisos bastan los de lectura
+    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4)) < 0)
     {
-        // Imprimir error
         mostrar_error_buscar_entrada(error);
-        return -1;
+#if DEBUG
+        printf("***********************************************************************\n");
+#endif
+        return EXIT_FAILURE;
     }
-    if (mi_stat_f(p_inodo, stat) == -1)
-    {
-        return -1;
-    }
-    return 0;
+    mi_stat_f(p_inodo, stat);
+    return p_inodo;
 }
 
 //

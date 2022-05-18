@@ -10,43 +10,39 @@ Miembros:
 
 int main(int argc, char **argv)
 {
-    if (argc <= 5)
+
+    if (argc < 5)
     {
-        fprintf(stderr, "Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>\n");
+        puts("Sintaxis: ./mi_escribir <disco> </ruta_fichero> <texto> <offset>");
         return -1;
     }
 
-    // Comprobar si se trata de un fichero
-    if (argv[2][strlen(argv[2]) - 1] == '/')
+    unsigned int offset = atoi(argv[4]);
+    const char *buffer;
+    const char *camino = argv[2];
+    int acumulado = 0;
+    for (size_t i = 3; i < argc - 1; i++)
     {
-        fprintf(stderr, "No es un fichero\n");
-        return -1;
+        buffer = argv[i];
+        int len = strlen(buffer);
+        acumulado += len;
+        if (i > 3)
+        {
+            acumulado++;
+        }
     }
 
-    if (bmount(argv[1]) == -1)
-    {
-        fprintf(stderr, "Error montando disco.\n");
-        return -1;
-    }
-
+    bmount(argv[1]);
 #if DEBUGMI_ESCRIBIR
-    fprintf(stderr, "Longitud texto: %ld\n", strlen(argv[3]));
+    fprintf(stderr, "Longitud texto: %ld\n", acumulado);
 #endif
+    int resultado = mi_write(camino, buffer, offset, acumulado);
+    if (resultado < 0)
+        return resultado;
 
-    // Cantidad de bytes escritos
-    int nbytes = mi_write(argv[2], argv[3], atoi(argv[4]), strlen(argv[3]));
-    if (nbytes == -1)
-    {
-        nbytes = 0;
-    }
-    if (bumount() == -1)
-    {
-        return -1;
-    }
-    return 0;
+    printf("%d bytes escritos.\n", resultado);
 
-#if DEBUGMI_ESCRIBIR
-    fprintf(stderr, "Bytes escritos: %d\n", nbytes);
-#endif
+    bumount();
+
     return 0;
 }

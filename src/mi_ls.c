@@ -35,7 +35,7 @@ int main(int argc, char **argv)
             bumount();
             return -1;
         }
-        printf("Tipo\tModo\tmTime\t\tTamaño\tNnombre\n");
+        printf("Tipo\tModo\tmTime\t\tTamaño\tNombre\n");
         printf("-----------------------------------------------------\n%s", buffer);
     }
     else
