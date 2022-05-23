@@ -32,7 +32,7 @@ int main(int argc, char **argv)
         return -1;
     }
     // Crear enlace
-    if (mi_link(argv[2], argv[3]) < 0)
+    if (mi_link(argv[2], argv[3]) == -1)
     {
         return -1;
     }
