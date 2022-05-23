@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
     bmount(argv[1]);
 #if DEBUGMI_ESCRIBIR
-    fprintf(stderr, "Longitud texto: %ld\n", acumulado);
+    fprintf(stderr, "Longitud texto: %d\n", acumulado);
 #endif
     int resultado = mi_write(camino, buffer, offset, acumulado);
     if (resultado < 0)
