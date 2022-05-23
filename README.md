@@ -2,6 +2,7 @@
 
 - [SSOO-II](#ssoo-ii)
     - [Niveles](#niveles)
+    - [Entregas](#entregas)
     - [Tree-files](#tree-files)
 
 ### Niveles
@@ -19,6 +20,12 @@
 - [ ] Nivel 11
 - [ ] Nivel 12
 - [ ] Nivel 13
+
+### Entregas
+
+- [x] Entrega 1
+- [ ] Entrega 2
+- [ ] Entrega 3
 
 ### Tree-files
 
