@@ -637,7 +637,6 @@ int mi_unlink(const char *camino)
         return -1;
     }
     // Inodo del archivo a borrar.
-    struct inodo inodo;
     if (leer_inodo(p_inodo, &inodo) == -1)
     {
         return -1;

@@ -27,33 +27,32 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    unsigned int offset = 0, bytes_leidos = 0, total_bytes_leidos = 0;
-    char *camino = argv[2];
     int tambuffer = BLOCKSIZE * 4;
-    char read[tambuffer];
-    if (memset(read, 0, sizeof(read)) == NULL)
+    int bytes_leidos = 0;
+    int offset = 0;
+    char buffer[tambuffer];
+    memset(buffer, 0, sizeof(buffer));
+    // Leemos todo el fichero o hasta completar el buffer
+    int bytes_leidosAux = mi_read(argv[2], buffer, offset, tambuffer);
+    while (bytes_leidosAux > 0)
     {
-        // Filtramos basura
-        return -1;
-    }
-    bytes_leidos = mi_read(camino, read, offset, tambuffer);
-    while (bytes_leidos > 0)
-    {
-        write(1, read, bytes_leidos); // Motrar resultados por pantalla
-        total_bytes_leidos += bytes_leidos;
+        // Actualiza el número de bytes leidos.
+        bytes_leidos += bytes_leidosAux;
+        // Escribe el contenido del buffer en el destino indicado.
+        write(1, buffer, bytes_leidosAux); // imprime por pantalla
+        // Limpia el buffer de lectura, actualiza el offset y vuelve a leer.
+        memset(buffer, 0, sizeof(buffer));
         offset += tambuffer;
-
-        if (memset(read, 0, sizeof(read)) == NULL)
-        {
-            // Limpieza
-            return -1;
-        }
-        bytes_leidos = mi_read(camino, read, offset, tambuffer);
+        bytes_leidosAux = mi_read(argv[2], buffer, offset, tambuffer);
     }
-    fprintf(stderr, "\nSe han leido %d bytes\n", total_bytes_leidos);
-    if (bumount() == -1)
+    if (bytes_leidos < 0)
     {
-        return -1;
+        mostrar_error_buscar_entrada(bytes_leidos);
+        bytes_leidos = 0;
     }
+    fprintf(stderr, "\nTotal_leidos: %d\n", bytes_leidos);
+
+    // Desmontar disco
+    bumount();
     return 0;
 }
