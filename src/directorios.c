@@ -556,3 +556,141 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     }
     return bytes_leidos;
 }
+
+/* --------- Nivel 9 --------- */
+
+// Crea el enlace de una entrada de directorio camino2 al
+// inodo especificado por otra entrada de directorio camino1.
+int mi_link(const char *camino1, const char *camino2)
+{
+    unsigned int p_inodo1 = 0, p_inodo_dir1 = 0, p_entrada1 = 0;
+    unsigned int p_inodo2 = 0, p_inodo_dir2 = 0, p_entrada2 = 0;
+    struct inodo inodo;
+    // Entrada 1
+    int err = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
+    if (err < 0)
+    {
+        mostrar_error_buscar_entrada(err);
+        return -1;
+    }
+    if (leer_inodo(p_inodo1, &inodo) == -1)
+    {
+        return -1;
+    }
+    if (inodo.tipo != 'f')
+    {
+        fprintf(stderr, "mi_link: %s ha de ser un fichero\n", camino1);
+        return -1;
+    }
+    if ((inodo.permisos & 4) != 4)
+    {
+        fprintf(stderr, "mi_link: %s no tiene permisos de lectura\n", camino1);
+        return ERROR_PERMISO_LECTURA;
+    }
+    // Entrada 2
+    err = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
+    if (err < 0)
+    {
+        mostrar_error_buscar_entrada(err);
+        return -1;
+    }
+    // Leemos la entrada creada correspondiente a camino2
+    // (entrada p_entrada2 de p_inodo_dir2).
+    struct entrada entrada2;
+    if (mi_read_f(p_inodo_dir2, &entrada2, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) == -1)
+    {
+        return -1;
+    }
+    // Creamos el enlace
+    // Asociamos a esta entrada el mismo inodo que el asociado a la
+    // entrada de camino1, es decir p_inodo1
+    entrada2.ninodo = p_inodo1;
+    // Escribimos la entrada modificada en p_inodo_dir2
+    if (mi_write_f(p_inodo_dir2, &entrada2, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) == -1)
+    {
+        return -1;
+    }
+    // Liberamos el inodo que se ha asociado a la entrada creada, p_inodo2
+    if (liberar_inodo(p_inodo2) == -1)
+    {
+        return -1;
+    }
+    // Incrementamos la cantidad de enlaces (nlinks) de p_inodo1, actualizamos el ctime y lo salvamos
+    inodo.nlinks++;
+    inodo.ctime = time(NULL);
+    if (escribir_inodo(p_inodo1, inodo) == -1)
+    {
+        return -1;
+    }
+    return 0;
+}
+
+// Función de la capa de directorios que borra la entrada del directorio especificado
+int mi_unlink(const char *camino)
+{
+    unsigned int p_inodo = 0, p_inodo_dir = 0, p_entrada = 0;
+    struct inodo inodo;
+    int err = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+    if (err < 0)
+    {
+        mostrar_error_buscar_entrada(err);
+        return -1;
+    }
+    // Inodo del archivo a borrar.
+    struct inodo inodo;
+    if (leer_inodo(p_inodo, &inodo) == -1)
+    {
+        return -1;
+    }
+    if ((inodo.tipo == 'd') && (inodo.tamEnBytesLog > 0))
+    {
+        return -1;
+    }
+    // Inodo del directorio.
+    struct inodo inodo_dir;
+    if (leer_inodo(p_inodo_dir, &inodo_dir) == -1)
+    {
+        return -1;
+    }
+    // Obtener el numero de entradas
+    int num_entrada = inodo_dir.tamEnBytesLog / sizeof(struct entrada);
+    // Entrada a eliminar es la última
+    // Si hay mas entradas
+    if (p_entrada != num_entrada - 1)
+    {
+        // Leer la última y colocarla en la posición de la entrada que queremos eliminar
+        struct entrada entrada;
+        if (mi_read_f(p_inodo_dir, &entrada, sizeof(struct entrada) * (num_entrada - 1), sizeof(struct entrada)) < 0)
+        {
+            return -1;
+        }
+
+        if (mi_write_f(p_inodo_dir, &entrada, sizeof(struct entrada) * (p_entrada), sizeof(struct entrada)) < 0)
+        {
+            return -1;
+        }
+    }
+    // Elimina la ultima entrada.
+    if (mi_truncar_f(p_inodo_dir, sizeof(struct entrada) * (num_entrada - 1)) == -1)
+    {
+        return -1;
+    }
+    inodo.nlinks--;
+    // Si no quedan enlaces (nlinks) entonces liberaremos el inodo
+    if (!inodo.nlinks)
+    {
+        if (liberar_inodo(p_inodo) == -1)
+        {
+            return -1;
+        }
+    }
+    else // Actualizamos su ctime y escribimos el inodo.
+    {
+        inodo.ctime = time(NULL);
+        if (escribir_inodo(p_inodo, inodo) == -1)
+        {
+            return -1;
+        }
+    }
+    return 0;
+}
