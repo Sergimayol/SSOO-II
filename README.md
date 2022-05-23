@@ -13,11 +13,17 @@
 - [x] Nivel 5
 - [x] Nivel 6
 - [x] Nivel 7
-- [ ] Nivel 8
+- [x] Nivel 8
+- [ ] Nivel 9
+- [ ] Nivel 10
+- [ ] Nivel 11
+- [ ] Nivel 12
+- [ ] Nivel 13
 
 ### Tree-files
 
 ```
+.
 .
 ├── Entregas
 │   ├── Entrega1
@@ -37,6 +43,7 @@
 │   │   ├── scripte1.sh
 │   │   ├── texto2.txt
 │   │   └── truncar.c
+│   ├── Entrega2
 │   └── toTarGz.sh
 ├── README.md
 ├── src
@@ -52,10 +59,24 @@
 │   ├── leer.c
 │   ├── leer_sf.c
 │   ├── makefile
+│   ├── mi_cat.c
+│   ├── mi_chmod.c
+│   ├── mi_escribir.c
+│   ├── mi_link.c
+│   ├── mi_ls.c
+│   ├── mi_mkdir.c
 │   ├── mi_mkfs.c
+│   ├── mi_rm.c
+│   ├── mi_stat.c
+│   ├── mi_touch.c
 │   ├── permitir.c
 │   └── truncar.c
 └── tests
+    ├── borrar_recursivo.sh
+    ├── copiar.sh
+    ├── estructura.sh
+    ├── mover.sh
+    ├── renombrar.sh
     ├── script1e1.sh
     ├── script2e1.sh
     ├── script_truncar.sh
