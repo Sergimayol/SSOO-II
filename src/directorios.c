@@ -6,9 +6,10 @@ Miembros:
 
 #include "directorios.h"
 
-#define DEBUG 0  // Debugger del nivel 7
-#define DEBUG8 0 // Debugger del nivel 8
-#define DEBUG9 1 // Debugger del nivel 9
+#define DEBUG 0   // Debugger del nivel 7
+#define DEBUG8 0  // Debugger del nivel 8
+#define DEBUG9 0  // Debugger del nivel 9
+#define DEBUG10 1 // Debugger del nivel 10
 
 struct superbloque SB;
 static struct UltimaEntrada UltimaEntradaEscritura[CACHE];
@@ -570,11 +571,17 @@ int mi_link(const char *camino1, const char *camino2)
     int err = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
     if (err < 0)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_link() → Error buscando entrada 1]\n");
+#endif
         mostrar_error_buscar_entrada(err);
         return -1;
     }
     if (leer_inodo(p_inodo1, &inodo) == -1)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_link() → Error leyendo inodo (entrada 1)]\n");
+#endif
         return -1;
     }
     if (inodo.tipo != 'f')
@@ -591,6 +598,9 @@ int mi_link(const char *camino1, const char *camino2)
     err = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (err < 0)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_link() → Error buscando entrada 2]\n");
+#endif
         mostrar_error_buscar_entrada(err);
         return -1;
     }
@@ -599,6 +609,9 @@ int mi_link(const char *camino1, const char *camino2)
     struct entrada entrada2;
     if (mi_read_f(p_inodo_dir2, &entrada2, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) == -1)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_link() → Error leyendo entrada creada del camino 2]\n");
+#endif
         return -1;
     }
     // Creamos el enlace
@@ -608,11 +621,17 @@ int mi_link(const char *camino1, const char *camino2)
     // Escribimos la entrada modificada en p_inodo_dir2
     if (mi_write_f(p_inodo_dir2, &entrada2, sizeof(struct entrada) * (p_entrada2), sizeof(struct entrada)) == -1)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_link() → Error escribiendo entrada creada del camino 2]\n");
+#endif
         return -1;
     }
     // Liberamos el inodo que se ha asociado a la entrada creada, p_inodo2
     if (liberar_inodo(p_inodo2) == -1)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_link() → Error liberando inodo 2]\n");
+#endif
         return -1;
     }
     // Incrementamos la cantidad de enlaces (nlinks) de p_inodo1, actualizamos el ctime y lo salvamos
@@ -620,6 +639,9 @@ int mi_link(const char *camino1, const char *camino2)
     inodo.ctime = time(NULL);
     if (escribir_inodo(p_inodo1, inodo) == -1)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_link() → Error escribiendo inodo]\n");
+#endif
         return -1;
     }
     return 0;
@@ -633,22 +655,34 @@ int mi_unlink(const char *camino)
     int err = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
     if (err < 0)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_unlink() → Error buscando entrada]\n");
+#endif
         mostrar_error_buscar_entrada(err);
         return -1;
     }
     // Inodo del archivo a borrar.
     if (leer_inodo(p_inodo, &inodo) == -1)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_unlink() → Error leyendo inodo del archivo a borrar]\n");
+#endif
         return -1;
     }
     if ((inodo.tipo == 'd') && (inodo.tamEnBytesLog > 0))
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_unlink() → Error tipo inodo]\n");
+#endif
         return -1;
     }
     // Inodo del directorio.
     struct inodo inodo_dir;
     if (leer_inodo(p_inodo_dir, &inodo_dir) == -1)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_unlink() → Error leyendo directorio]\n");
+#endif
         return -1;
     }
     // Obtener el numero de entradas
@@ -661,17 +695,26 @@ int mi_unlink(const char *camino)
         struct entrada entrada;
         if (mi_read_f(p_inodo_dir, &entrada, sizeof(struct entrada) * (num_entrada - 1), sizeof(struct entrada)) < 0)
         {
+#if DEBUG10
+            fprintf(stderr, "[mi_unlink() → Error mi_read_f()]\n");
+#endif
             return -1;
         }
 
         if (mi_write_f(p_inodo_dir, &entrada, sizeof(struct entrada) * (p_entrada), sizeof(struct entrada)) < 0)
         {
+#if DEBUG10
+            fprintf(stderr, "[mi_unlink() → Error mi_write_f()]\n");
+#endif
             return -1;
         }
     }
     // Elimina la ultima entrada.
     if (mi_truncar_f(p_inodo_dir, sizeof(struct entrada) * (num_entrada - 1)) == -1)
     {
+#if DEBUG10
+        fprintf(stderr, "[mi_unlink() → Error mi_truncar_f()]\n");
+#endif
         return -1;
     }
     inodo.nlinks--;
@@ -680,6 +723,9 @@ int mi_unlink(const char *camino)
     {
         if (liberar_inodo(p_inodo) == -1)
         {
+#if DEBUG10
+            fprintf(stderr, "[mi_link() → Error liberando inodo 2]\n");
+#endif
             return -1;
         }
     }
@@ -688,6 +734,9 @@ int mi_unlink(const char *camino)
         inodo.ctime = time(NULL);
         if (escribir_inodo(p_inodo, inodo) == -1)
         {
+#if DEBUG10
+            fprintf(stderr, "[mi_link() → Error escribiendo inodo]\n");
+#endif
             return -1;
         }
     }

@@ -32,8 +32,9 @@ int main(int argc, char **argv)
         return -1;
     }
     // Crear enlace
-    if (mi_link(argv[2], argv[3]) == -1)
+    if (mi_link(argv[2], argv[3]) < 0)
     {
+        fprintf(stderr, "Error creando enlace.\n");
         return -1;
     }
     // Desmontar disco
