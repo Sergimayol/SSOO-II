@@ -17,7 +17,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    unsigned int offset = atoi(argv[4]);
+    int offset = atoi(argv[argc - 1]);
     const char *buffer;
     const char *camino = argv[2];
     int acumulado = 0;
