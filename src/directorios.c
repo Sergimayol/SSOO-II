@@ -6,8 +6,8 @@ Miembros:
 
 #include "directorios.h"
 
-#define DEBUG 1  // Debugger del nivel 7
-#define DEBUG8 1 // Debugger del nivel 8
+#define DEBUG 0  // Debugger del nivel 7
+#define DEBUG8 0 // Debugger del nivel 8
 #define DEBUG9 1 // Debugger del nivel 9
 
 struct superbloque SB;
@@ -45,7 +45,7 @@ int extraer_camino(const char *camino, char *inicial, char *final, char *tipo)
         strcpy(final, "");
     }
 #if DEBUG
-    // fprintf(stderr, "Camino: %s\nInicio: %s\nFinal: %s\nTipo: %s\n", camino, inicial, final, tipo);
+    fprintf(stderr, "Camino: %s\nInicio: %s\nFinal: %s\nTipo: %s\n", camino, inicial, final, tipo);
 #endif
     return 0;
 }
@@ -249,25 +249,25 @@ void mostrar_error_buscar_entrada(int error)
     switch (error)
     {
     case -1:
-        fprintf(stderr, "Error: Camino incorrecto.\n");
+        fprintf(stderr, ROJO_F "Error: Camino incorrecto.\n" RESET_FORMATO);
         break;
     case -2:
-        fprintf(stderr, "Error: Permiso denegado de lectura.\n");
+        fprintf(stderr, ROJO_F "Error: Permiso denegado de lectura.\n" RESET_FORMATO);
         break;
     case -3:
-        fprintf(stderr, "Error: No existe el archivo o el directorio.\n");
+        fprintf(stderr, ROJO_F "Error: No existe el archivo o el directorio.\n" RESET_FORMATO);
         break;
     case -4:
-        fprintf(stderr, "Error: No existe algún directorio intermedio.\n");
+        fprintf(stderr, ROJO_F "Error: No existe algún directorio intermedio.\n" RESET_FORMATO);
         break;
     case -5:
-        fprintf(stderr, "Error: Permiso denegado de escritura.\n");
+        fprintf(stderr, ROJO_F "Error: Permiso denegado de escritura.\n" RESET_FORMATO);
         break;
     case -6:
-        fprintf(stderr, "Error: El archivo ya existe.\n");
+        fprintf(stderr, ROJO_F "Error: El archivo ya existe.\n" RESET_FORMATO);
         break;
     case -7:
-        fprintf(stderr, "Error: No es un directorio.\n");
+        fprintf(stderr, "Error: No es un directorio.\n" RESET_FORMATO);
         break;
     }
 }
