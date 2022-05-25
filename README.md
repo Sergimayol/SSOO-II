@@ -15,7 +15,7 @@
 - [x] Nivel 6
 - [x] Nivel 7
 - [x] Nivel 8
-- [ ] Nivel 9
+- [x] Nivel 9
 - [ ] Nivel 10
 - [ ] Nivel 11
 - [ ] Nivel 12
