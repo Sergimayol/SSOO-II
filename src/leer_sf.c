@@ -6,234 +6,28 @@ Miembros:
 
 #include "directorios.h"
 
-#define DEBUG1 0 // Debugger del nivel 1
-#define DEBUG2 0 // Debugger del nivel 2
-#define DEBUG3 0 // Debugger del nivel 3
-#define DEBUG4 0 // Debugger del nivel 4
-#define DEBUG7 1 // Debugger del nivel 4
-
 struct superbloque SB;
-struct inodo inodos[BLOCKSIZE / INODOSIZE];
+void *buf[BLOCKSIZE];
+const char *dir;
 
-int printSuperBloque();
-int printListaEnlazada();
-int printMapaBits();
-int printInodo();
-int printTraducirBloqueInodo();
-void mostrar_buscar_entrada(char *camino, char reservar);
-
-int main(int argc, char **argsv)
+int main(int argc, char **argv)
 {
-    if (argc == 2)
-    {
-        if (bmount(argsv[1]) == -1)
-        {
-            fprintf(stderr, "Error montando dispositivo virtual.\n");
-            return -1;
-        }
-
-        printSuperBloque();
-#if DEBUG2
-        printListaEnlazada();
-#endif
-
-#if DEBUG1
-        printf("sizeof struct superbloque: %li\n", sizeof(struct superbloque));
-        printf("sizeof struct inodo: %li\n\n", sizeof(struct inodo));
-#endif
-
-#if DEBUG3
-        printMapaBits();
-        printInodo();
-#endif
-
-#if DEBUG4
-        printTraducirBloqueInodo();
-#endif
-#if DEBUG7
-        // Mostrar creación directorios y errores
-        mostrar_buscar_entrada("pruebas/", 1);           // ERROR_CAMINO_INCORRECTO
-        mostrar_buscar_entrada("/pruebas/", 0);          // ERROR_NO_EXISTE_ENTRADA_CONSULTA
-        mostrar_buscar_entrada("/pruebas/docs/", 1);     // ERROR_NO_EXISTE_DIRECTORIO_INTERMEDIO
-        mostrar_buscar_entrada("/pruebas/", 1);          // creamos /pruebas/
-        mostrar_buscar_entrada("/pruebas/docs/", 1);     // creamos /pruebas/docs/
-        mostrar_buscar_entrada("/pruebas/docs/doc1", 1); // creamos /pruebas/docs/doc1
-        mostrar_buscar_entrada("/pruebas/docs/doc1/doc11", 1);
-        // ERROR_NO_SE_PUEDE_CREAR_ENTRADA_EN_UN_FICHERO
-        mostrar_buscar_entrada("/pruebas/", 1);          // ERROR_ENTRADA_YA_EXISTENTE
-        mostrar_buscar_entrada("/pruebas/docs/doc1", 0); // consultamos /pruebas/docs/doc1
-        mostrar_buscar_entrada("/pruebas/docs/doc1", 1); // creamos /pruebas/docs/doc1
-        mostrar_buscar_entrada("/pruebas/casos/", 1);    // creamos /pruebas/casos/
-        mostrar_buscar_entrada("/pruebas/docs/doc2", 1); // creamos /pruebas/docs/doc2
-#endif
-        if (bumount() == -1)
-        {
-            fprintf(stderr, "Error desmontando dispositivo virtual.\n");
-            return -1;
-        }
-    }
-    else
-    {
-        fprintf(stderr, "Error sintaxis: ./leer_sf <nombre_dispositivo>\n");
-        return -1;
-    }
-    return 0;
-}
-
-void mostrar_buscar_entrada(char *camino, char reservar)
-{
-    unsigned int p_inodo_dir = 0;
-    unsigned int p_inodo = 0;
-    unsigned int p_entrada = 0;
-    int error;
-    printf("\ncamino: %s, reservar: %d\n", camino, reservar);
-    if ((error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6)) < 0)
-    {
-        mostrar_error_buscar_entrada(error);
-    }
-    printf("**********************************************************************\n");
-    return;
-}
-
-int printSuperBloque()
-{
-    if (bread(0, &SB) == -1)
-    {
-        return -1;
-    }
-    printf("DATOS DEL SUPERBLOQUE\n");
-    printf("posPrimerBloqueMB: %d\n", SB.posPrimerBloqueMB);
-    printf("posUltimoBloqueMB: %d\n", SB.posUltimoBloqueMB);
-    printf("posPrimerBloqueAI: %d\n", SB.posPrimerBloqueAI);
-    printf("posUltimoBloqueAI: %d\n", SB.posUltimoBloqueAI);
-    printf("posPrimerBloqueDatos: %d\n", SB.posPrimerBloqueDatos);
-    printf("posUltimoBloqueDatos: %d\n", SB.posUltimoBloqueDatos);
-    printf("posInodoRaíz: %d\n", SB.posInodoRaiz);
-    printf("posPrimerInodoLibre: %d\n", SB.posPrimerInodoLibre);
-    printf("cantBloquesLibres: %d\n", SB.cantBloquesLibres);
-    printf("cantInodosLibres: %d\n", SB.cantInodosLibres);
-    printf("totBloques: %d\n", SB.totBloques);
-    printf("totInodos: %d\n\n", SB.totInodos);
-    return 0;
-}
-
-int printListaEnlazada()
-{
-    printf("RECORRIDO LISTA ENLAZADA DE INODOS LIBRES:\n");
-    int indexInodos = SB.posPrimerInodoLibre + 1; // Cantidad de Inodos
-    int lastInodo = 0;
-    for (int i = SB.posPrimerBloqueAI; (i <= SB.posUltimoBloqueAI) && (lastInodo == 0); i++)
-    { // Recorrido de todos los inodos
-        if (bread(i, inodos) == -1)
-        {
-            fprintf(stderr, "Error while reading");
-            return -1;
-        }
-        for (int j = 0; j < (BLOCKSIZE / INODOSIZE); j++)
-        { // Recorrido de cada uno de los inodos
-            if (indexInodos < SB.totInodos)
-            {
-                inodos[j].punterosDirectos[0] = indexInodos; // Declaramos la conexion con el siguiente inodo
-                indexInodos++;
-                printf("%d ", inodos[j].punterosDirectos[0]);
-            }
-            else
-            { // Estamos al final
-                inodos[j].punterosDirectos[0] = UINT_MAX;
-                lastInodo = 1;
-                printf("%d ", inodos[j].punterosDirectos[0]);
-                break;
-            }
-        }
-    }
-    printf("\n");
-    return 0;
-}
-
-int printMapaBits()
-{
-    printf("\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS:\n");
-    int reservado = reservar_bloque(); // Actualiza el SB
-    bread(posSB, &SB);                 // Actualizar los valores del SB
-    printf("Se ha reservado el bloque físico nº %i que era el 1º libre indicado por el MB.\n", reservado);
-    printf("SB.cantBloquesLibres = %i\n", SB.cantBloquesLibres);
-    liberar_bloque(reservado);
-    bread(posSB, &SB); // Actualizar los valores del SB
-    printf("Liberamos ese bloque, y después SB.cantBloquesLibres = %i\n\n", SB.cantBloquesLibres);
-    printf("MAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
-    int bit = leer_bit(posSB);
-    printf("leer_bit(%i) = %i\n\n", posSB, bit);
-    bit = leer_bit(SB.posPrimerBloqueMB);
-    printf("leer_bit(%i) = %i\n\n", SB.posPrimerBloqueMB, bit);
-    bit = leer_bit(SB.posUltimoBloqueMB);
-    printf("leer_bit(%i) = %i\n\n", SB.posUltimoBloqueMB, bit);
-    bit = leer_bit(SB.posPrimerBloqueAI);
-    printf("leer_bit(%i) = %i\n\n", SB.posPrimerBloqueAI, bit);
-    bit = leer_bit(SB.posUltimoBloqueAI);
-    printf("leer_bit(%i) = %i\n\n", SB.posUltimoBloqueAI, bit);
-    bit = leer_bit(SB.posPrimerBloqueDatos);
-    printf("leer_bit(%i) = %i\n\n", SB.posPrimerBloqueDatos, bit);
-    bit = leer_bit(SB.posUltimoBloqueDatos);
-    printf("leer_bit(%i) = %i\n\n", SB.posUltimoBloqueDatos, bit);
-    return 0;
-}
-
-int printInodo()
-{
-    printf("\nDATOS DEL DIRECTORIO RAIZ\n");
-    struct tm *ts;
-    char atime[80];
-    char mtime[80];
-    char ctime[80];
-    struct inodo inodo;
-    int ninodo = SB.posInodoRaiz; // el directorio raiz es el inodo 0
-    leer_inodo(ninodo, &inodo);
-    ts = localtime(&inodo.atime);
-    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
-    ts = localtime(&inodo.mtime);
-    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
-    ts = localtime(&inodo.ctime);
-    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
-    printf("tipo: %c\n", inodo.tipo);
-    printf("permisos: %i\n", inodo.permisos);
-    printf("ID: %d \nATIME: %s \nMTIME: %s \nCTIME: %s\n", ninodo, atime, mtime, ctime);
-    printf("nlinks: %i\n", inodo.nlinks);
-    printf("tamaño en bytes lógicos: %i\n", inodo.tamEnBytesLog);
-    printf("Número de bloques ocupados: %i\n", inodo.numBloquesOcupados);
-    return 0;
-}
-
-int printTraducirBloqueInodo()
-{
-    int inodoReservado = reservar_inodo('f', 6);
-    bread(posSB, &SB);
-
-    printf("\nINODO %d - TRADUCCION DE LOS BLOQUES LOGICOS 8, 204, 30.004, 400.004 y 468.750\n", inodoReservado);
-    traducir_bloque_inodo(inodoReservado, 8, 1);
-    traducir_bloque_inodo(inodoReservado, 204, 1);
-    traducir_bloque_inodo(inodoReservado, 30004, 1);
-    traducir_bloque_inodo(inodoReservado, 400004, 1);
-    traducir_bloque_inodo(inodoReservado, 468750, 1);
-
-    printf("\nDATOS DEL INODO RESERVADO: %d\n", inodoReservado);
-    struct tm *ts;
-    char atime[80];
-    char mtime[80];
-    char ctime[80];
-    struct inodo inodo;
-    leer_inodo(inodoReservado, &inodo); // Leemos el Inodo reservado
-    ts = localtime(&inodo.atime);
-    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
-    ts = localtime(&inodo.mtime);
-    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
-    ts = localtime(&inodo.ctime);
-    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
-    printf("tipo: %c\n", inodo.tipo);
-    printf("permisos: %i\n", inodo.permisos);
-    printf("ATIME: %s \nMTIME: %s \nCTIME: %s\n", atime, mtime, ctime);
-    printf("nlinks: %i\n", inodo.nlinks);
-    printf("tamaño en bytes lógicos: %i\n", inodo.tamEnBytesLog);
-    printf("Número de bloques ocupados: %i\n", inodo.numBloquesOcupados);
-    printf("SB.posPrimerInodoLibre = %d\n", SB.posPrimerInodoLibre);
-    return 0;
+    dir = argv[1];
+    bmount(dir);
+    bread(posSB, buf);
+    memcpy(&SB, buf, sizeof(struct superbloque)); // aprovechando la declaracion de SB, rellenarlo con lo que hemos leído
+    fprintf(stderr, "DATOS DEL SUPERBLOQUE\n");
+    fprintf(stderr, "posPrimerBloqueMB: %i\n", SB.posPrimerBloqueMB);
+    fprintf(stderr, "posUltimoBloqueMB: %i\n", SB.posUltimoBloqueMB);
+    fprintf(stderr, "posPrimerBloqueAI: %i\n", SB.posPrimerBloqueAI);
+    fprintf(stderr, "posUltimoBloqueAI: %i\n", SB.posUltimoBloqueAI);
+    fprintf(stderr, "posPrimerBloqueDatos: %i\n", SB.posPrimerBloqueDatos);
+    fprintf(stderr, "posUltimoBloqueDatos: %i\n", SB.posUltimoBloqueDatos);
+    fprintf(stderr, "posInodoRaíz: %i\n", SB.posInodoRaiz);
+    fprintf(stderr, "posPrimerInodoLibre: %i\n", SB.posPrimerInodoLibre);
+    fprintf(stderr, "cantBloquesLibres: %i\n", SB.cantBloquesLibres);
+    fprintf(stderr, "cantInodosLibres: %i\n", SB.cantInodosLibres);
+    fprintf(stderr, "totBloques: %i\n", SB.totBloques);
+    fprintf(stderr, "totInodos: %i\n\n", SB.totInodos);
+    return EXIT_SUCCESS;
 }
