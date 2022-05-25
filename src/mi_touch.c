@@ -5,42 +5,48 @@ Miembros:
 */
 
 #include "directorios.h"
-
+#define DEBUG 1;
 int main(int argc, char **argv)
 {
-    // Comprobación sintaxis
+
     if (argc != 4)
     {
-        fprintf(stderr, "Error de sintaxis: ./mi_touch <disco> <permisos> </ruta>\n");
-        return -1;
+        printf("Sintaxis: ./mi_touch <disco> <permisos> </ruta>\n");
+        exit(1);
     }
-    // Comprobar de si se trata de un fichero o un directorio
-    if (argv[3][strlen(argv[3]) - 1] != '/')
-    {
-        // Comprobación permisos
-        if ((atoi(argv[2]) < 0) || (atoi(argv[2]) > 7))
-        {
-            fprintf(stderr, "Error de permisos: permisos [%d] no válidos.\n", atoi(argv[2]));
-            return -1;
-        }
-        // Montar disco
-        if (bmount(argv[1]) == -1)
-        {
-            fprintf(stderr, "Error montando disco.\n");
-            return -1;
-        }
 
-        if (mi_creat(argv[3], atoi(argv[2])) == -1)
-        {
-            bumount();
-            return -1;
-        }
-    }
-    else
+    // Diferenciamos entre fichero y directorio
+    const char *camino = argv[3];
+    if (camino[strlen(camino) - 1] == '/')
     {
-        fprintf(stderr, "No es una ruta de directorio válida.\n");
+        fprintf(stderr, "Error (mi_touch.c): No es un fichero");
         return -1;
     }
-    bumount();
+
+    char *nombre_fichero = argv[1];
+    if (bmount(nombre_fichero) == -1)
+    {
+        printf("Error (mi_touch.c) en montar el disco %s\n", nombre_fichero);
+        exit(1);
+    }
+
+    int permisos = atoi(argv[2]);
+    // Hay que comprobar que permisos sea un nº válido (0-7).
+    if (permisos < 0 || permisos > 7)
+    {
+        printf("Error : modo inválido: <<%d>> \n", permisos);
+        exit(1);
+    }
+
+    if (mi_creat(camino, permisos) == -1)
+    {
+        exit(1);
+    }
+
+    if (bumount() == -1)
+    {
+        printf("Error (mi_touch.c) en desmontar el disco %s\n", nombre_fichero);
+        exit(1);
+    }
     return 0;
 }
