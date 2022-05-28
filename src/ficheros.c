@@ -29,12 +29,18 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     desp1 = offset % BLOCKSIZE;
     desp2 = (offset + nbytes - 1) % BLOCKSIZE;
 
+#if DEBUG11
+    mi_waitSem();
+#endif
     // Obtencion del numero de bloque fisico
     nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
     if (nbfisico == -1)
     {
         return -1;
     }
+#if DEBUG11
+    mi_signalSem();
+#endif
     // Leemos el bloque fisico
     if (bread(nbfisico, buf_bloque) == -1)
     {
@@ -65,7 +71,17 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         // Escribimos los bloques intermedios
         for (int i = primerBL + 1; i < ultimoBL; i++)
         {
+#if DEBUG11
+            mi_waitSem();
+#endif
             nbfisico = traducir_bloque_inodo(ninodo, i, 1);
+            if (nbfisico == -1)
+            {
+                return -1;
+            }
+#if DEBUG11
+            mi_signalSem();
+#endif
             auxbytesEscritos = bwrite(nbfisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE);
             if (auxbytesEscritos == -1)
             {
@@ -73,13 +89,18 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             }
             nbytesEscritos += auxbytesEscritos;
         }
-        // Ultimo bloque
+// Ultimo bloque
+#if DEBUG11
+        mi_waitSem();
+#endif
         int nUltimobloqueFisico = traducir_bloque_inodo(ninodo, ultimoBL, 1);
         if (nUltimobloqueFisico == -1)
         {
             return -1;
         }
-
+#if DEBUG11
+        mi_signalSem();
+#endif
         if (bread(nUltimobloqueFisico, buf_bloque) == -1)
         {
             return -1;
@@ -93,6 +114,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
         nbytesEscritos += desp2 + 1;
     }
+#if DEBUG11
+    mi_waitSem();
+#endif
     // Leer el inodo actualizado.
     if (leer_inodo(ninodo, &inodo) == -1)
     {
@@ -110,6 +134,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     {
         return -1;
     }
+#if DEBUG11
+    mi_signalSem();
+#endif
     if (nbytes != nbytesEscritos)
     {
         return -1;
@@ -209,7 +236,10 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         nbytesLeidos += desp2 + 1;
     }
 
-    // Actualizar metadatos
+// Actualizar metadatos
+#if DEBUG11
+    mi_waitSem();
+#endif
     if (leer_inodo(ninodo, &inodo) == -1)
     {
         fprintf(stderr, "Error al lectura inodo \n");
@@ -221,6 +251,9 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         fprintf(stderr, "Error al escritura inodo || mi_read_f() \n");
         return -1;
     }
+#if DEBUG11
+    mi_signalSem();
+#endif
     if (nbytes != nbytesLeidos)
     {
         return -1;
@@ -257,6 +290,9 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat)
 // indique el argumento permisos.
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos)
 {
+#if DEBUG11
+    mi_waitSem();
+#endif
     struct inodo inodo;
 
     if (leer_inodo(ninodo, &inodo) == -1)
@@ -273,6 +309,9 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos)
         fprintf(stderr, "Error al escribir inodo \n");
         return -1;
     }
+#if DEBUG11
+    mi_signalSem();
+#endif
     return 0;
 }
 

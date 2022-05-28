@@ -10,6 +10,7 @@ Miembros:
 #define DEBUG8 0  // Debugger del nivel 8
 #define DEBUG9 0  // Debugger del nivel 9
 #define DEBUG10 1 // Debugger del nivel 10
+#define DEBUG11 1 // Debugger del nivel 11
 
 struct superbloque SB;
 static struct UltimaEntrada UltimaEntradaEscritura[CACHE];
@@ -279,6 +280,9 @@ void mostrar_error_buscar_entrada(int error)
 // y su entrada de directorio.
 int mi_creat(const char *camino, unsigned char permisos)
 {
+#if DEBUG11
+    mi_waitSem();
+#endif
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
     // Obtenemos el valor de buscar_entrada
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
@@ -289,6 +293,9 @@ int mi_creat(const char *camino, unsigned char permisos)
         mostrar_error_buscar_entrada(error);
         return -1;
     }
+#if DEBUG11
+    mi_waitSem();
+#endif
     return 0;
 }
 
@@ -564,6 +571,9 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
 // inodo especificado por otra entrada de directorio camino1.
 int mi_link(const char *camino1, const char *camino2)
 {
+#if DEBUG11
+    mi_waitSem();
+#endif
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
     struct entrada entrada;
     struct inodo inodo;
@@ -602,11 +612,17 @@ int mi_link(const char *camino1, const char *camino2)
     inodo.nlinks++;
     inodo.ctime = time(NULL);
     escribir_inodo(ninodo, inodo);
+#if DEBUG11
+    mi_signalSem();
+#endif
     return 0;
 }
 // Función de la capa de directorios que borra la entrada del directorio especificado
 int mi_unlink(const char *camino)
 {
+#if DEBUG11
+    mi_waitSem();
+#endif
     unsigned int p_inodo = 0, p_inodo_dir = 0, p_entrada = 0;
     struct inodo inodo;
     int err = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
@@ -697,5 +713,8 @@ int mi_unlink(const char *camino)
             return -1;
         }
     }
+#if DEBUG11
+    mi_signalSem();
+#endif
     return 0;
 }
