@@ -5,6 +5,10 @@ Miembros:
 */
 
 #include "bloques.h"
+#include "semaforo_mutex_posix.h"
+
+static sem_t *mutex;
+static unsigned int inside_sc = 0;
 
 // Descriptor del fichero alamcenado como variable global estática,
 // descpara que sólo pueda ser accedida en bloques.c
@@ -14,6 +18,15 @@ static int descriptor = 0;
 // trata de un fichero, esa acción consistirá en abrirlo.
 int bmount(const char *camino)
 {
+    // Semaforo
+    if (!mutex) // el semáforo es único en el sistema y sólo se ha de inicializar 1 vez (padre)
+    {
+        mutex = initSem();
+        if (mutex == SEM_FAILED)
+        {
+            return -1;
+        }
+    }
     umask(000);
     // Permisos rw-rw-rw (6-6-6)
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
@@ -29,6 +42,7 @@ int bmount(const char *camino)
 // en caso contrario.
 int bumount()
 {
+    deleteSem();
     descriptor = close(descriptor);
     if (descriptor == -1)
     {
@@ -86,5 +100,22 @@ int bread(unsigned int nbloque, void *buf)
         }
         // Se devuelven el num de bloques leidos
         return bloqueL;
+    }
+}
+void mi_waitSem()
+{
+    if (!inside_sc)
+    { // inside_sc==0
+        waitSem(mutex);
+    }
+    inside_sc++;
+}
+
+void mi_signalSem()
+{
+    inside_sc--;
+    if (!inside_sc)
+    {
+        signalSem(mutex);
     }
 }

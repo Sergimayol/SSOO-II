@@ -27,7 +27,7 @@ Miembros:
 
 #define TAMNOMBRE 60   // tamaño del nombre de directorio o fichero
 #define PROFUNDIDAD 32 // profundidad máxima del árbol de directorios
-
+#define MAX_CHAR 256
 #define CACHE 10 // Tamaño cache lectura ultimaEntrada
 
 struct entrada
