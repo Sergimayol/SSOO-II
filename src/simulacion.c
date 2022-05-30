@@ -88,19 +88,19 @@ int main(int argc, char **argv)
                 registro.nRegistro = rand() % REGMAX;
 
                 mi_write(path_f, &registro, registro.nRegistro * sizeof(struct REGISTRO), sizeof(struct REGISTRO));
-#if DEBUGSIMULACION
-                fprintf(stderr, "[simulación.c → Escritura %i en %s]\n", nescritura + 1, nombrefich);
-                // fprintf(stderr, BLUE"registro.fecha =  %ld registro.pid = %d, registro.nEscritura = %d, registro.nRegistro = %d\n"RESET, registro.fecha, registro.pid, registro.nEscritura, registro.nRegistro);
-#endif
+                // #if DEBUGSIMULACION
+                //                 fprintf(stderr, "[simulación.c → Escritura %i en %s]\n", nescritura + 1, nombrefich);
+                //                 // fprintf(stderr, BLUE"registro.fecha =  %ld registro.pid = %d, registro.nEscritura = %d, registro.nRegistro = %d\n"RESET, registro.fecha, registro.pid, registro.nEscritura, registro.nRegistro);
+                // #endif
                 usleep(50000);
                 if (nescritura == NUMESCRITURAS - 1)
                 {
                     fprintf(stderr, "Proceso %d: Completadas %d escrituras en %s\n", proceso, NUMESCRITURAS, path_f);
                 }
             }
-#if DEBUGSIMULACION
-            fprintf(stderr, "[Proceso %d: Completadas %d escrituras en %s]\n", proceso, NUMESCRITURAS, nombrefich);
-#endif
+            // #if DEBUGSIMULACION
+            //             fprintf(stderr, "[Proceso %d: Completadas %d escrituras en %s]\n", proceso, NUMESCRITURAS, nombrefich);
+            // #endif
             bumount();
             exit(0);
         }
