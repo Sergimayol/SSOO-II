@@ -252,7 +252,7 @@ int mi_creat(const char *camino, unsigned char permisos)
         return -1;
     }
 #if DEBUG11
-    mi_waitSem();
+    mi_signalSem();
 #endif
     return 0;
 }

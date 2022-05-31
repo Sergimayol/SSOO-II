@@ -122,7 +122,7 @@ int main(int argc, char **argv)
             offset += sizeof(buffer_escrituras);
         }
 
-#if DEBUG
+#if DEBUGVERIFICACION
         fprintf(stderr, "[%i) %i escrituras validadas en %s]\n", nentr + 1, info.nEscrituras, f_prueba);
 #endif
         // Añadimos la informacion del struct info en el fichero
