@@ -23,8 +23,8 @@ void reaper()
 
 int main(int argc, char **argv)
 {
-    char path[21]; // Nombre del archivo
-    char tmp[100]; // Año, mes, dia, hora, minuto, segundo
+    char camino[21]; // Nombre del archivo
+    char tmp[100];   // Año, mes, dia, hora, minuto, segundo
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
     pid_t pid;
@@ -42,12 +42,12 @@ int main(int argc, char **argv)
     }
 
     // Creamos el nombre del directorio
-    strcpy(path, "/simul_");
+    strcpy(camino, "/simul_");
     sprintf(tmp, "%d%02d%02d%02d%02d%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
-    strcat(path, tmp);
-    strcat(path, "/");
+    strcat(camino, tmp);
+    strcat(camino, "/");
 
-    mi_creat(path, 6);
+    mi_creat(camino, 6);
 
     for (int proceso = 1; proceso <= NUMPROCESOS; proceso++)
     {
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
             char pid_d[10];
             memset(path_file, 0, sizeof(path_file));
 
-            strcpy(path_d, path);
+            strcpy(path_d, camino);
 
             // Cremamos el nombre del directorio hijo
             strcat(path_d, "proceso_");
