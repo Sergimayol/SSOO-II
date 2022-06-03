@@ -1,11 +1,13 @@
 #include "simulacion.h"
 
-#define DEBUGSIMULACION 0 // debbuger programa simulación
+#define DEBUGSIMULACION 0 // Debbuger programa simulación
+
 int acabados = 0;
 
 void reaper()
 {
     pid_t ended;
+    // Asociamos sigchld al reaper()
     signal(SIGCHLD, reaper);
     while ((ended = waitpid(-1, NULL, WNOHANG)) > 0)
     {
@@ -16,13 +18,15 @@ void reaper()
     }
 }
 
+// Funcion que ejecuta cada proceso y que se encargará de crear un directorio y un fichero para cada proceso,
+// guardando en el fichero las escrituras correspondientes
+
 int main(int argc, char **argv)
 {
-    char path[21]; // nombre del archivo
-    char tmp[100]; // año, mes,dia,hora,minuto,segundo
+    char path[21]; // Nombre del archivo
+    char tmp[100]; // Año, mes, dia, hora, minuto, segundo
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
-
     pid_t pid;
 
     signal(SIGCHLD, reaper);
@@ -73,6 +77,7 @@ int main(int argc, char **argv)
 
             mi_creat(path_d, 6);
 
+            // Creamos prueba.dat
             strcpy(path_f, path_d);
             strcat(path_f, "prueba.dat");
             mi_creat(path_f, 6);
@@ -104,8 +109,10 @@ int main(int argc, char **argv)
             bumount();
             exit(0);
         }
+        // Esperamos 0,2 segundos
         usleep(200000);
     }
+    // Esperamos a que todos los procesos acaben
     while (acabados < NUMPROCESOS)
     {
         pause();
