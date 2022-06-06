@@ -144,31 +144,6 @@ int main(int argc, char **argv)
         char buffer[BLOCKSIZE];
         memset(buffer, 0, BLOCKSIZE);
 
-        sprintf(buffer, "PID: %i\nNumero de escrituras: %i\n", pid, info.nEscrituras);
-        sprintf(buffer + strlen(buffer), "%s %i %i %s",
-                "Primera escritura",
-                info.PrimeraEscritura.nEscritura,
-                info.PrimeraEscritura.nRegistro,
-                asctime(localtime(&info.PrimeraEscritura.fecha)));
-
-        sprintf(buffer + strlen(buffer), "%s %i %i %s",
-                "Ultima escritura",
-                info.UltimaEscritura.nEscritura,
-                info.UltimaEscritura.nRegistro,
-                asctime(localtime(&info.UltimaEscritura.fecha)));
-
-        sprintf(buffer + strlen(buffer), "%s %i %i %s",
-                "Menor posicion",
-                info.MenorPosicion.nEscritura,
-                info.MenorPosicion.nRegistro,
-                asctime(localtime(&info.MenorPosicion.fecha)));
-
-        sprintf(buffer + strlen(buffer), "%s %i %i %s",
-                "Mayor posicion",
-                info.MayorPosicion.nEscritura,
-                info.MayorPosicion.nRegistro,
-                asctime(localtime(&info.MayorPosicion.fecha)));
-
         sprintf(buffer,
                 "PID: %d\nNumero de escrituras:\t%d\nPrimera escritura:"
                 "\t%d\t%d\t%s\nUltima escritura:\t%d\t%d\t%s\nMayor po"
@@ -187,14 +162,15 @@ int main(int argc, char **argv)
                 info.MayorPosicion.nRegistro,
                 tiempoMayor);
         // Escribimos en prueba.dat y actualizamos offset
-        if ((nbytes_info_f += mi_write(nfichero, &buffer, nbytes_info_f, strlen(buffer))) < 0)
+        nbytes_info_f += mi_write(nfichero, &buffer, nbytes_info_f, strlen(buffer));
+        if (nbytes_info_f < 0)
         {
-            printf("verifiacion.c: Error al escribir el fichero: '%s'\n", nfichero);
+            printf("verifiacion.c -> Error al escribir el fichero: '%s'\n", nfichero);
             bumount();
             return -1;
         }
     }
-    // Desmontar dispositivo virtual
+    // Desmontar dispositivo
     if (bumount() == -1)
     {
         return -1;
