@@ -13,24 +13,24 @@ int main(int argc, char **argv)
     // Comprobar sintaxis
     if (argc != 3)
     {
-        fprintf(stderr, ROJO_F "Error de sintaxis: ./verificacion <nombre_dispositivo> <directorio_simulación>\n" RESET_FORMATO);
+        fprintf(stderr, "Sintaxis: ./verificacion <nombre_dispositivo> <directorio_simulación> \n");
         return -1;
     }
-
-    // Montar dispositivo virtual
+    // Montar el dispositivo
     if (bmount(argv[1]) == -1)
     {
         return -1;
     }
-    struct STAT st;
-    mi_stat(argv[2], &st);
 #if DEBUGVERIFICACION
     fprintf(stderr, "dir_sim: %s\n", argv[2]);
 #endif
+    // Calcular el nº de entradas del directorio de simulación a partir del stat de su inodo
+    struct STAT st;
+    mi_stat(argv[2], &st);
     int num_entradas = st.tamEnBytesLog / sizeof(struct entrada);
-    if (num_entradas != NUMPROCESOS)
+    if (num_entradas != NUMPROCESOS) // Si son diferentes -> error
     {
-        fprintf(stderr, ROJO_F "verificacion.c: Error en el número de entradas.\n" RESET_FORMATO);
+        fprintf(stderr, "verificacion.c: Error en el número de entradas.\n");
         bumount();
         return -1;
     }
@@ -46,86 +46,86 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    // Cargamos las entradas
-    struct entrada entrs[num_entradas];
-    if (mi_read(argv[2], entrs, 0, sizeof(entrs)) == 0)
+    // Entradas del directorio de simulación
+    struct entrada entradas[num_entradas];
+    if (mi_read(argv[2], entradas, 0, sizeof(entradas)) == 0)
     {
         return -1;
     }
     int nbytes_info_f = 0;
-    for (int nentr = 0; nentr < num_entradas; nentr++)
+    // Para cada entrada de directorio de un proceso
+    for (int numEntrada = 0; numEntrada < num_entradas; numEntrada++)
     {
-
-        // Leemos la entrada de directorio y extraemos el pid a partir del nombre
-        //  de la entrada
-        pid_t pid = atoi(strchr(entrs[nentr].nombre, '_') + 1); // sacamos el pid a traves del nombre
+        // Leer la entrada de directorio y extraer el PID a partir del nombre
+        // de la entrada y guardarlo en el registro info
+        pid_t pid = atoi(strchr(entradas[numEntrada].nombre, '_') + 1);
         struct INFORMACION info;
         info.pid = pid;
         info.nEscrituras = 0;
 
-        char f_prueba[128]; // camino fichero
-        sprintf(f_prueba, "%s%s/%s", argv[2], entrs[nentr].nombre, "prueba.dat");
+        char fichero_prueba[128]; // camino fichero
+        sprintf(fichero_prueba, "%s%s/%s", argv[2], entradas[numEntrada].nombre, "prueba.dat");
 
         // Buffer de N registros de escrituras
-        int cant_registros_buffer_escrituras = 256 * 24; // Un multiple de BLOCKSIZE, en plataforma de 64bits
-        struct REGISTRO buffer_escrituras[cant_registros_buffer_escrituras];
+        int total_registros_escritura = 256 * 24; // Un multiple de BLOCKSIZE, en plataforma de 64bits
+        struct REGISTRO buffer_escrituras[total_registros_escritura];
         memset(buffer_escrituras, 0, sizeof(buffer_escrituras));
 
         int offset = 0;
         // Mientras haya escrituras en prueba.dat
-        while (mi_read(f_prueba, buffer_escrituras, offset, sizeof(buffer_escrituras)) > 0)
+        while (mi_read(fichero_prueba, buffer_escrituras, offset, sizeof(buffer_escrituras)) > 0)
         {
-
             // iterador escrituras buffer
-            int nregistro = 0;
-            while (nregistro < cant_registros_buffer_escrituras)
+            int indice = 0;
+            while (indice < total_registros_escritura)
             {
-                // Si es valida
-                if (buffer_escrituras[nregistro].pid == info.pid)
+                // Si la escritura es válida
+                if (buffer_escrituras[indice].pid == info.pid)
                 {
-                    // Si es la Primera escritura validada
+                    // Si es la primera escritura validada
                     if (!info.nEscrituras)
                     {
-                        info.MenorPosicion = buffer_escrituras[nregistro];
-                        info.MayorPosicion = buffer_escrituras[nregistro];
-                        info.PrimeraEscritura = buffer_escrituras[nregistro];
-                        info.UltimaEscritura = buffer_escrituras[nregistro];
+                        info.MenorPosicion = buffer_escrituras[indice];
+                        info.MayorPosicion = buffer_escrituras[indice];
+                        info.PrimeraEscritura = buffer_escrituras[indice];
+                        info.UltimaEscritura = buffer_escrituras[indice];
                         info.nEscrituras++;
                     }
                     else
                     {
-                        // Actualizamos los datos de las fechas la primera y la última escritura si se necesita
-                        if ((difftime(buffer_escrituras[nregistro].fecha, info.PrimeraEscritura.fecha)) <= 0 &&
-                            buffer_escrituras[nregistro].nEscritura < info.PrimeraEscritura.nEscritura)
+                        // Actualizamos los datos de las fechas la primera
+                        // y si es preciso la última escritura
+                        if ((difftime(buffer_escrituras[indice].fecha, info.PrimeraEscritura.fecha)) <= 0 &&
+                            buffer_escrituras[indice].nEscritura < info.PrimeraEscritura.nEscritura)
                         {
-                            info.PrimeraEscritura = buffer_escrituras[nregistro];
+                            info.PrimeraEscritura = buffer_escrituras[indice];
                         }
-                        if ((difftime(buffer_escrituras[nregistro].fecha, info.UltimaEscritura.fecha)) >= 0 &&
-                            buffer_escrituras[nregistro].nEscritura > info.UltimaEscritura.nEscritura)
+                        if ((difftime(buffer_escrituras[indice].fecha, info.UltimaEscritura.fecha)) >= 0 &&
+                            buffer_escrituras[indice].nEscritura > info.UltimaEscritura.nEscritura)
                         {
-                            info.UltimaEscritura = buffer_escrituras[nregistro];
+                            info.UltimaEscritura = buffer_escrituras[indice];
                         }
-                        if (buffer_escrituras[nregistro].nRegistro < info.MenorPosicion.nRegistro)
+                        if (buffer_escrituras[indice].nRegistro < info.MenorPosicion.nRegistro)
                         {
-                            info.MenorPosicion = buffer_escrituras[nregistro];
+                            info.MenorPosicion = buffer_escrituras[indice];
                         }
-                        if (buffer_escrituras[nregistro].nRegistro > info.MayorPosicion.nRegistro)
+                        if (buffer_escrituras[indice].nRegistro > info.MayorPosicion.nRegistro)
                         {
-                            info.MayorPosicion = buffer_escrituras[nregistro];
+                            info.MayorPosicion = buffer_escrituras[indice];
                         }
                         info.nEscrituras++;
                     }
                 }
-                nregistro++;
+                indice++;
             }
             memset(&buffer_escrituras, 0, sizeof(buffer_escrituras));
             offset += sizeof(buffer_escrituras);
         }
 
 #if DEBUGVERIFICACION
-        fprintf(stderr, "[%i) %i escrituras validadas en %s]\n", nentr + 1, info.nEscrituras, f_prueba);
+        fprintf(stderr, "[%i) %i escrituras validadas en %s]\n", numEntrada + 1, info.nEscrituras, fichero_prueba);
 #endif
-        // Añadimos la informacion del struct info en el fichero
+        // Añadir la información del struct info al fichero informe.txt por el final
         char tiempoPrimero[100];
         char tiempoUltimo[100];
         char tiempoMenor[100];
