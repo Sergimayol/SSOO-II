@@ -75,46 +75,8 @@ SSOO-II
 │   │   ├── mi_stat.c
 │   │   ├── mi_touch.c
 │   │   ├── permitir.c
-│   │   ├── scripte1.sh
 │   │   ├── scripte2.sh
-│   │   ├── scripte3.sh
-│   │   ├── texto2.txt
 │   │   └── truncar.c
-│   ├── Entrega3
-│   │   ├── README.txt
-│   │   ├── bloques.c
-│   │   ├── bloques.h
-│   │   ├── directorios.c
-│   │   ├── directorios.h
-│   │   ├── ejemplo_mutex_posix.c
-│   │   ├── escribir.c
-│   │   ├── ficheros.c
-│   │   ├── ficheros.h
-│   │   ├── ficheros_basico.c
-│   │   ├── ficheros_basico.h
-│   │   ├── leer.c
-│   │   ├── leer_sf.c
-│   │   ├── makefile
-│   │   ├── mi_cat.c
-│   │   ├── mi_chmod.c
-│   │   ├── mi_escribir.c
-│   │   ├── mi_escribir_varios.c
-│   │   ├── mi_link.c
-│   │   ├── mi_ls.c
-│   │   ├── mi_mkdir.c
-│   │   ├── mi_mkfs.c
-│   │   ├── mi_rm.c
-│   │   ├── mi_stat.c
-│   │   ├── mi_touch.c
-│   │   ├── permitir.c
-│   │   ├── semaforo_mutex_posix.c
-│   │   ├── semaforo_mutex_posix.h
-│   │   ├── simulacion.c
-│   │   ├── simulacion.h
-│   │   ├── texto2.txt
-│   │   ├── truncar.c
-│   │   ├── verificacion.c
-│   │   └── verificacion.h
 │   └── toTarGz.sh
 ├── README.md
 ├── src
@@ -122,7 +84,6 @@ SSOO-II
 │   ├── bloques.h
 │   ├── directorios.c
 │   ├── directorios.h
-│   ├── ejemplo_mutex_posix.c
 │   ├── escribir.c
 │   ├── ficheros.c
 │   ├── ficheros.h
@@ -143,13 +104,7 @@ SSOO-II
 │   ├── mi_stat.c
 │   ├── mi_touch.c
 │   ├── permitir.c
-│   ├── semaforo_mutex_posix.c
-│   ├── semaforo_mutex_posix.h
-│   ├── simulacion.c
-│   ├── simulacion.h
-│   ├── truncar.c
-│   ├── verificacion.c
-│   └── verificacion.h
+│   └── truncar.c
 └── tests
     ├── borrar_recursivo.sh
     ├── copiar.sh
@@ -164,7 +119,6 @@ SSOO-II
     ├── script_truncar_parcial2.sh
     ├── scripte1.sh
     ├── scripte2.sh
-    ├── scripte3.sh
     ├── test10.sh
     ├── test8.sh
     ├── test8touch.sh
