@@ -216,7 +216,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     }
     else
     {
-        fprintf(stderr, "Inodo[%d] doesn't have reading privileges\n", ninodo);
+        fprintf(stderr, "Error de privilegios en lectura en el Inodo[%d]\n\n", ninodo);
         return -1;
     }
 }
