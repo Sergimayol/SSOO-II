@@ -17,6 +17,8 @@ Sintaxis Específica:
  - mi_rm.c: ./mi_rm </ruta_fichero>
  - mi_stat.c: ./mi_stat <disco> </ruta>
  - mi_touch.c: ./mi_touch <disco> <permisos> </ruta>
+ - verificacion.c: ./verificacion <nombre_dispositivo> <directorio_simulación>
+ - simulacion.c: ./simulacion disco
 
 Observaciones:
  - En la funcion initMB del fichero: "ficheros_basico.c" para poner a 1 los bits del mapa de bits que corresponden
