@@ -247,6 +247,9 @@ int mi_creat(const char *camino, unsigned char permisos)
     // Si el valor es menor que 0
     if (error < 0)
     {
+#if DEBUG11
+        mi_signalSem();
+#endif
         // Imprimir error
         mostrar_error_buscar_entrada(error);
         return -1;
