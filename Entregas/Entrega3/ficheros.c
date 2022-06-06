@@ -17,29 +17,29 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     int desp1 = offset % BLOCKSIZE;
     int desp2 = (offset + nbytes - 1) % BLOCKSIZE;
     unsigned char buf_bloque[BLOCKSIZE];
+
     leer_inodo(ninodo, &inodo);
+
     if ((inodo.permisos & 2) == 2)
     {
-#if DEBUG11
+
         mi_waitSem();
-#endif
         int nbfisico = traducir_bloque_inodo(ninodo, primerBL, 1);
-#if DEBUG11
         mi_signalSem();
-#endif
         // cabe en un solo bloque
         if (primerBL == ultimoBL)
         {
+
             if (bread(nbfisico, buf_bloque) == -1)
             {
-                fprintf(stderr, "Error leyendo\n");
+                fprintf(stderr, "Error while reading\n");
                 return -1;
             }
             memcpy(buf_bloque + desp1, buf_original, nbytes);
 
             if (bwrite(nbfisico, buf_bloque) == -1)
             {
-                fprintf(stderr, "Error escribiendo\n");
+                fprintf(stderr, "Error while writing\n");
                 return -1;
             }
             bytes_escritos += nbytes;
@@ -47,60 +47,59 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         else
         { // No cabe en un solo bloque
             // primer bloque lógico
+
             if (bread(nbfisico, buf_bloque) == -1)
             {
-                fprintf(stderr, "Error leyendo\n");
+                fprintf(stderr, "Error while reading\n");
                 return -1;
             }
             memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);
+
             if (bwrite(nbfisico, buf_bloque) == -1)
             {
-                fprintf(stderr, "Error escribiendo\n");
+                fprintf(stderr, "Error while writing\n");
                 return -1;
             }
             bytes_escritos += BLOCKSIZE - desp1;
+
             // bloques lógicos intermedios
+
             for (int i = primerBL + 1; i < ultimoBL; i++)
             {
-#if DEBUG11
                 mi_waitSem();
-#endif
                 nbfisico = traducir_bloque_inodo(ninodo, i, 1);
-#if DEBUG11
                 mi_signalSem();
-#endif
+
                 if (bwrite(nbfisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE) == -1)
                 {
-                    fprintf(stderr, "Error escribiendo\n");
+                    fprintf(stderr, "Error while writing\n");
                     return -1;
                 }
+
                 bytes_escritos += BLOCKSIZE;
             }
-//último bloque lógico
-#if DEBUG11
+
+            //último bloque lógico
             mi_waitSem();
-#endif
             nbfisico = traducir_bloque_inodo(ninodo, ultimoBL, 1);
-#if DEBUG11
             mi_signalSem();
-#endif
+
             if (bread(nbfisico, buf_bloque) == -1)
             {
-                fprintf(stderr, "Error leyendo\n");
+                fprintf(stderr, "Error while reading\n");
                 return -1;
             }
             memcpy(buf_bloque, buf_original + (nbytes - desp2 - 1), desp2 + 1);
+
             if (bwrite(nbfisico, buf_bloque) == -1)
             {
-                fprintf(stderr, "Error escribiendo\n");
+                fprintf(stderr, "Error while writing\n");
                 return -1;
             }
             bytes_escritos += desp2 + 1;
         }
-// actualizamos inodo
-#if DEBUG11
+        // actualizamos inodo
         mi_waitSem();
-#endif
         leer_inodo(ninodo, &inodo);
         // printf("TAMENBYTESLOG %d \n",inodo.tamEnBytesLog);//SHOULD BE STAT?
         if (inodo.tamEnBytesLog < (bytes_escritos + offset))
@@ -110,78 +109,87 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         }
         inodo.mtime = time(NULL);
         escribir_inodo(ninodo, inodo);
-#if DEBUG11
         mi_signalSem();
-#endif
         return bytes_escritos;
     }
     else
     {
-        fprintf(stderr, "Error de privilegios en escritura en el Inodo[%d]\n", ninodo);
+        fprintf(stderr, "Inodo[%d] doesn't have writing privileges\n", ninodo);
         return -1;
     }
 }
 
-// Lee información de un fichero/directorio correspondiente al nº de inodo,
-// ninodo, pasado como argumento y la almacena en un buffer de memoria
+/*
+ * Lee información de un fichero/directorio correspondiente al nº de inodo, ninodo, pasado como argumento y la almacena en un buffer de memoria
+ *
+ * Input:   ninodo          => Nº del inodo a leer
+ *          *buf_original   => buffer de memoria
+ *          offset          => posición inicia de lectura con respecto al inodo (en bytes)
+ *          nbytes          => numero de bytes a leer
+ * Output:  0 uppon success, 1 otherwise
+ */
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes)
 {
     struct inodo inodo;
     int bytes_leidos = 0;
-#if DEBUG11
     mi_waitSem();
-#endif
     leer_inodo(ninodo, &inodo);
     inodo.atime = time(NULL);
     escribir_inodo(ninodo, inodo);
-#if DEBUG11
     mi_signalSem();
-#endif
     // Modificamos el atime
+
     if (offset >= inodo.tamEnBytesLog)
     {
-        return bytes_leidos;
+        return bytes_leidos; // return 0;
     }
     if ((offset + nbytes) >= inodo.tamEnBytesLog)
     {
         nbytes = inodo.tamEnBytesLog - offset;
     }
-    // Comprobar permisos
+
     if ((inodo.permisos & 4) == 4)
-    {
+    { // Check permisos de lectura inodo leido
+
         int primerBL = offset / BLOCKSIZE;
         int ultimoBL = (offset + nbytes - 1) / BLOCKSIZE;
         int desp1 = offset % BLOCKSIZE;
+
         unsigned char buf_bloque[BLOCKSIZE];
+
         int nbfisico = traducir_bloque_inodo(ninodo, primerBL, 0);
-        // Cabe en un solo bloque
+
+        // Todo cabe en un solo bloque
         if (primerBL == ultimoBL)
         {
             if (nbfisico != -1)
             {
                 if (bread(nbfisico, buf_bloque) == -1)
                 {
-                    fprintf(stderr, "Error de lectura\n");
+                    fprintf(stderr, "Error while reading\n");
                     return -1;
                 }
+
                 memcpy(buf_original, buf_bloque + desp1, nbytes);
             }
             bytes_leidos = nbytes;
         }
         else
         { // Los datos no caben en un solo bloque
+
             // Primer bloque
             if (nbfisico != -1)
             {
                 if (bread(nbfisico, buf_bloque) == -1)
                 {
-                    fprintf(stderr, "Error de lectura\n");
+                    fprintf(stderr, "Error while reading \n");
                     return -1;
                 }
-                // Leemos el primer bloque
-                memcpy(buf_original, buf_bloque + desp1, BLOCKSIZE - desp1);
+
+                memcpy(buf_original, buf_bloque + desp1, BLOCKSIZE - desp1); // Leemos el primer bloque
             }
             bytes_leidos = BLOCKSIZE - desp1;
+
             // Bloques intermedios
             for (int i = primerBL + 1; i < ultimoBL; i++)
             {
@@ -191,32 +199,36 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
                 {
                     if (bread(nbfisico, buf_bloque) == -1)
                     {
-                        fprintf(stderr, "Error leyendo\n");
+                        fprintf(stderr, "Error while reading\n");
                         return -1;
                     }
                     memcpy(buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE, buf_bloque, BLOCKSIZE); // leemos todo el bloque
                 }
                 bytes_leidos += BLOCKSIZE;
             }
+
             // Ultimo bloque
             int desp2 = (offset + nbytes - 1) % BLOCKSIZE;
+
             nbfisico = traducir_bloque_inodo(ninodo, ultimoBL, 0);
+
             if (nbfisico != -1)
             {
                 if (bread(nbfisico, buf_bloque) == -1)
                 {
-                    fprintf(stderr, "Error leyendo\n");
+                    fprintf(stderr, "Error while reading\n");
                     return -1;
                 }
                 memcpy(buf_original + (nbytes - desp2 - 1), buf_bloque, desp2 + 1);
             }
             bytes_leidos += desp2 + 1;
         }
+
         return bytes_leidos;
     }
     else
     {
-        fprintf(stderr, "Error de privilegios en lectura en el Inodo[%d]\n\n", ninodo);
+        fprintf(stderr, "Inodo[%d] doesn't have reading privileges\n", ninodo);
         return -1;
     }
 }
@@ -254,13 +266,16 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos)
     mi_waitSem();
 #endif
     struct inodo inodo;
+
     if (leer_inodo(ninodo, &inodo) == -1)
     {
         fprintf(stderr, "Error al lectura inodo \n");
         return -1;
     }
+
     inodo.permisos = permisos;
     inodo.ctime = time(NULL);
+
     if (escribir_inodo(ninodo, inodo) == -1)
     {
         fprintf(stderr, "Error al escribir inodo \n");
