@@ -17,9 +17,9 @@
 - [x] Nivel 8
 - [x] Nivel 9
 - [x] Nivel 10
-- [ ] Nivel 11
-- [ ] Nivel 12
-- [ ] Nivel 13
+- [x] Nivel 11
+- [x] Nivel 12
+- [x] Nivel 13
 
 ### Entregas
 
