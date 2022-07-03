@@ -1,3 +1,9 @@
+/*
+Miembros:
+ - Sergi Mayol Matos
+ - Alejandro Rodríguez Arguimbau
+*/
+
 #include "simulacion.h"
 
 #define DEBUGSIMULACION 0 // Debbuger programa simulación

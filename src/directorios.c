@@ -543,7 +543,6 @@ int mi_link(const char *camino1, const char *camino2)
 #if DEBUG11
         mi_signalSem();
 #endif
-
         return -1;
     }
     int ninodo = p_inodo;
